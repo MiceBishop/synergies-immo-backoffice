@@ -10,6 +10,7 @@ import { useAuthStore } from '@/stores/auth-store'
 import { AppShell } from '@/components/layout/app-shell'
 import { LoginPage } from '@/pages/login-page'
 import { DashboardPage } from '@/pages/dashboard-page'
+import { OwnersPage } from '@/pages/owners-page'
 import { SettingsPage } from '@/pages/settings-page'
 
 const rootRoute = createRootRoute({
@@ -53,6 +54,12 @@ const dashboardRoute = createRoute({
   component: DashboardPage,
 })
 
+const ownersRoute = createRoute({
+  getParentRoute: () => appLayoutRoute,
+  path: '/owners',
+  component: OwnersPage,
+})
+
 const settingsRoute = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: '/settings',
@@ -61,7 +68,11 @@ const settingsRoute = createRoute({
 
 const routeTree = rootRoute.addChildren([
   loginRoute,
-  appLayoutRoute.addChildren([dashboardRoute, settingsRoute]),
+  appLayoutRoute.addChildren([
+    dashboardRoute,
+    ownersRoute,
+    settingsRoute,
+  ]),
 ])
 
 export const router = createRouter({
