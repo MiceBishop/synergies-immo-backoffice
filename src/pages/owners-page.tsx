@@ -1,40 +1,61 @@
-import { useState } from 'react'
-import { MoreHorizontal, Pencil, Plus, Search, Trash2 } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { MoreHorizontal, Pencil, Plus, Search, Trash2, X } from 'lucide-react'
 import { toast } from 'sonner'
+import type { ColumnDef } from '@tanstack/react-table'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { OwnerFormDialog } from '@/components/owners/owner-form-dialog'
+import {
+  DataTable,
+  DataTableColumnHeader,
+  DataTableDateRangeFilter,
+  useDataTableState,
+  type DateRangeValue,
+} from '@/components/shared/data-table'
 import { ConfirmDeleteDialog } from '@/components/shared/confirm-delete-dialog'
-import { useOwners, useDeleteOwner, type Owner } from '@/hooks/use-owners'
+import { OwnerFormDialog } from '@/components/owners/owner-form-dialog'
+import {
+  useOwnersList,
+  useDeleteOwner,
+  type Owner,
+} from '@/hooks/use-owners'
+import { formatDate } from '@/lib/format'
 
 export function OwnersPage() {
+  const [state, setState] = useDataTableState({
+    sorting: [{ id: 'last_name', desc: false }],
+  })
   const [search, setSearch] = useState('')
+  const [created, setCreated] = useState<DateRangeValue>({ from: null, to: null })
+
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<Owner | null>(null)
   const [deleting, setDeleting] = useState<Owner | null>(null)
 
-  const { data: owners, isLoading, isError } = useOwners(search)
+  const stateForQuery = useMemo(
+    () => ({ ...state, globalFilter: search }),
+    [state, search]
+  )
+
+  const { data, isLoading, isError } = useOwnersList({
+    state: stateForQuery,
+    createdFrom: created.from,
+    createdTo: created.to,
+  })
   const deleteOwner = useDeleteOwner()
+
+  const fullName = (o: Owner) =>
+    [o.first_name, o.last_name].filter(Boolean).join(' ')
 
   const openCreate = () => {
     setEditing(null)
     setFormOpen(true)
   }
-
   const openEdit = (owner: Owner) => {
     setEditing(owner)
     setFormOpen(true)
@@ -53,8 +74,82 @@ export function OwnersPage() {
     }
   }
 
-  const fullName = (o: Owner) =>
-    [o.first_name, o.last_name].filter(Boolean).join(' ')
+  const hasActiveFilters =
+    Boolean(search) || Boolean(created.from || created.to)
+
+  const resetFilters = () => {
+    setSearch('')
+    setCreated({ from: null, to: null })
+    setState({ page: 1 })
+  }
+
+  const columns = useMemo<ColumnDef<Owner>[]>(
+    () => [
+      {
+        accessorKey: 'last_name',
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Nom" />
+        ),
+        cell: ({ row }) => (
+          <span className="font-medium">{fullName(row.original)}</span>
+        ),
+      },
+      {
+        accessorKey: 'email',
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="E-mail" />
+        ),
+        cell: ({ row }) => row.original.email ?? '—',
+      },
+      {
+        accessorKey: 'phone',
+        header: 'Téléphone',
+        enableSorting: false,
+        cell: ({ row }) => row.original.phone ?? '—',
+      },
+      {
+        accessorKey: 'tax_id',
+        header: 'NINEA',
+        enableSorting: false,
+        cell: ({ row }) => row.original.tax_id ?? '—',
+      },
+      {
+        accessorKey: 'created_at',
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Créé le" />
+        ),
+        cell: ({ row }) => formatDate(row.original.created_at),
+      },
+      {
+        id: 'actions',
+        header: () => null,
+        enableSorting: false,
+        cell: ({ row }) => (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="size-8">
+                <MoreHorizontal className="size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onSelect={() => openEdit(row.original)}>
+                <Pencil className="mr-2 size-4" />
+                Modifier
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onSelect={() => setDeleting(row.original)}
+                className="text-destructive focus:text-destructive"
+              >
+                <Trash2 className="mr-2 size-4" />
+                Supprimer
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ),
+      },
+    ],
+    []
+  )
 
   return (
     <div className="space-y-6">
@@ -65,88 +160,57 @@ export function OwnersPage() {
             Gérez les propriétaires des immeubles.
           </p>
         </div>
-        <Button onClick={openCreate}>
-          <Plus className="size-4" />
-          Ajouter un propriétaire
-        </Button>
       </div>
 
-      <div className="relative max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-        <Input
-          placeholder="Rechercher par nom ou e-mail…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="pl-9"
-        />
-      </div>
-
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nom</TableHead>
-              <TableHead>E-mail</TableHead>
-              <TableHead>Téléphone</TableHead>
-              <TableHead>NINEA</TableHead>
-              <TableHead className="w-12" />
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading && (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                  Chargement…
-                </TableCell>
-              </TableRow>
+      <DataTable
+        columns={columns}
+        state={state}
+        onStateChange={setState}
+        data={data?.rows ?? []}
+        total={data?.total ?? 0}
+        isLoading={isLoading}
+        isError={isError}
+        emptyMessage={
+          hasActiveFilters
+            ? 'Aucun propriétaire ne correspond aux filtres.'
+            : 'Aucun propriétaire enregistré. Ajoutez-en un pour commencer.'
+        }
+        toolbar={
+          <>
+            <div className="relative w-full max-w-xs">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+              <Input
+                placeholder="Rechercher par nom, e-mail ou téléphone…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-9 h-9"
+              />
+            </div>
+            <DataTableDateRangeFilter
+              title="Créé entre"
+              value={created}
+              onChange={setCreated}
+            />
+            {hasActiveFilters && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-9"
+                onClick={resetFilters}
+              >
+                Réinitialiser
+                <X className="ml-1 size-3.5" />
+              </Button>
             )}
-            {isError && (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center text-destructive py-8">
-                  Erreur lors du chargement des propriétaires.
-                </TableCell>
-              </TableRow>
-            )}
-            {!isLoading && !isError && owners?.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                  Aucun propriétaire trouvé.
-                </TableCell>
-              </TableRow>
-            )}
-            {owners?.map((owner) => (
-              <TableRow key={owner.id}>
-                <TableCell className="font-medium">{fullName(owner)}</TableCell>
-                <TableCell>{owner.email ?? '—'}</TableCell>
-                <TableCell>{owner.phone ?? '—'}</TableCell>
-                <TableCell>{owner.tax_id ?? '—'}</TableCell>
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="size-8">
-                        <MoreHorizontal className="size-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onSelect={() => openEdit(owner)}>
-                        <Pencil className="mr-2 size-4" />
-                        Modifier
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onSelect={() => setDeleting(owner)}
-                        className="text-destructive focus:text-destructive"
-                      >
-                        <Trash2 className="mr-2 size-4" />
-                        Supprimer
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+          </>
+        }
+        toolbarActions={
+          <Button onClick={openCreate}>
+            <Plus className="size-4" />
+            Ajouter un propriétaire
+          </Button>
+        }
+      />
 
       <OwnerFormDialog open={formOpen} onOpenChange={setFormOpen} owner={editing} />
       <ConfirmDeleteDialog
