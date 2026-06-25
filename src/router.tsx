@@ -11,6 +11,7 @@ import { AppShell } from '@/components/layout/app-shell'
 import { LoginPage } from '@/pages/login-page'
 import { DashboardPage } from '@/pages/dashboard-page'
 import { OwnersPage } from '@/pages/owners-page'
+import { BuildingsPage } from '@/pages/buildings-page'
 import { SettingsPage } from '@/pages/settings-page'
 
 const rootRoute = createRootRoute({
@@ -60,6 +61,12 @@ const ownersRoute = createRoute({
   component: OwnersPage,
 })
 
+const buildingsRoute = createRoute({
+  getParentRoute: () => appLayoutRoute,
+  path: '/buildings',
+  component: BuildingsPage,
+})
+
 const settingsRoute = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: '/settings',
@@ -71,6 +78,7 @@ const routeTree = rootRoute.addChildren([
   appLayoutRoute.addChildren([
     dashboardRoute,
     ownersRoute,
+    buildingsRoute,
     settingsRoute,
   ]),
 ])
