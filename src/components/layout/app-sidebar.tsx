@@ -6,6 +6,7 @@ import {
   Home,
   Receipt,
   Settings,
+  UserSquare,
   Users,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -18,6 +19,7 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   { to: '/', label: 'Tableau de bord', icon: Home },
+  { to: '/owners', label: 'Propriétaires', icon: UserSquare },
   { to: '/buildings', label: 'Immeubles', icon: Building2 },
   { to: '/tenants', label: 'Locataires', icon: Users },
   { to: '/leases', label: 'Baux', icon: FileText },
