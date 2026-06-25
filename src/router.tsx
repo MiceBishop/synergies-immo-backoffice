@@ -12,6 +12,7 @@ import { LoginPage } from '@/pages/login-page'
 import { DashboardPage } from '@/pages/dashboard-page'
 import { OwnersPage } from '@/pages/owners-page'
 import { BuildingsPage } from '@/pages/buildings-page'
+import { BuildingDetailPage } from '@/pages/building-detail-page'
 import { SettingsPage } from '@/pages/settings-page'
 
 const rootRoute = createRootRoute({
@@ -67,6 +68,12 @@ const buildingsRoute = createRoute({
   component: BuildingsPage,
 })
 
+const buildingDetailRoute = createRoute({
+  getParentRoute: () => appLayoutRoute,
+  path: '/buildings/$id',
+  component: BuildingDetailPage,
+})
+
 const settingsRoute = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: '/settings',
@@ -79,6 +86,7 @@ const routeTree = rootRoute.addChildren([
     dashboardRoute,
     ownersRoute,
     buildingsRoute,
+    buildingDetailRoute,
     settingsRoute,
   ]),
 ])

@@ -89,6 +89,24 @@ export function useBuildingsList(params: BuildingsListParams) {
   })
 }
 
+export function useBuilding(id: string | null | undefined) {
+  return useQuery({
+    enabled: Boolean(id),
+    queryKey: [...buildingsKey, 'one', id],
+    queryFn: async (): Promise<BuildingRow> => {
+      const { data, error } = await supabase
+        .from('buildings')
+        .select(
+          'id, name, address, city, floor_count, owner_id, notes, photo_url, created_at, updated_at, owner:owners(id, first_name, last_name)'
+        )
+        .eq('id', id!)
+        .single()
+      if (error) throw error
+      return data as unknown as BuildingRow
+    },
+  })
+}
+
 /** Distinct city list — feeds the faceted filter. */
 export function useBuildingCities() {
   return useQuery({

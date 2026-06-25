@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
-import { MoreHorizontal, Pencil, Plus, Search, Trash2, X } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
+import { ExternalLink, MoreHorizontal, Pencil, Plus, Search, Trash2, X } from 'lucide-react'
 import { toast } from 'sonner'
 import type { ColumnDef } from '@tanstack/react-table'
 import { Button } from '@/components/ui/button'
@@ -118,7 +119,13 @@ export function BuildingsPage() {
           <DataTableColumnHeader column={column} title="Nom" />
         ),
         cell: ({ row }) => (
-          <span className="font-medium">{row.original.name}</span>
+          <Link
+            to="/buildings/$id"
+            params={{ id: row.original.id }}
+            className="font-medium hover:underline"
+          >
+            {row.original.name}
+          </Link>
         ),
       },
       {
@@ -167,6 +174,16 @@ export function BuildingsPage() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild>
+                <Link
+                  to="/buildings/$id"
+                  params={{ id: row.original.id }}
+                  className="cursor-pointer"
+                >
+                  <ExternalLink className="mr-2 size-4" />
+                  Voir le détail
+                </Link>
+              </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => openEdit(row.original)}>
                 <Pencil className="mr-2 size-4" />
                 Modifier
