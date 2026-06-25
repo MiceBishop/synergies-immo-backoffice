@@ -20,7 +20,11 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { ownerSchema, type OwnerFormValues } from '@/schemas/owner.schema'
+import {
+  ownerSchema,
+  type OwnerFormValues,
+  type OwnerFormOutput,
+} from '@/schemas/owner.schema'
 import { useCreateOwner, useUpdateOwner, type Owner } from '@/hooks/use-owners'
 
 type OwnerFormDialogProps = {
@@ -66,13 +70,15 @@ export function OwnerFormDialog({ open, onOpenChange, owner }: OwnerFormDialogPr
   }, [open, owner, form])
 
   const onSubmit = form.handleSubmit(async (values) => {
-    const parsed = ownerSchema.parse(values)
+    // zodResolver returns the transformed output as `values` at runtime,
+    // but RHF's types still treat it as the input shape — cast to bridge.
+    const payload = values as unknown as OwnerFormOutput
     try {
       if (owner) {
-        await updateOwner.mutateAsync({ id: owner.id, values: parsed })
+        await updateOwner.mutateAsync({ id: owner.id, values: payload })
         toast.success('Propriétaire mis à jour')
       } else {
-        await createOwner.mutateAsync(parsed)
+        await createOwner.mutateAsync(payload)
         toast.success('Propriétaire créé')
       }
       onOpenChange(false)

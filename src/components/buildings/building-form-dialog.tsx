@@ -25,6 +25,7 @@ import { Combobox } from '@/components/shared/combobox'
 import {
   buildingSchema,
   type BuildingFormValues,
+  type BuildingFormOutput,
 } from '@/schemas/building.schema'
 import {
   useCreateBuilding,
@@ -87,13 +88,15 @@ export function BuildingFormDialog({
     })) ?? []
 
   const onSubmit = form.handleSubmit(async (values) => {
-    const parsed = buildingSchema.parse(values)
+    // zodResolver returns the transformed output as `values` at runtime,
+    // but RHF's types still treat it as the input shape — cast to bridge.
+    const payload = values as unknown as BuildingFormOutput
     try {
       if (building) {
-        await updateBuilding.mutateAsync({ id: building.id, values: parsed })
+        await updateBuilding.mutateAsync({ id: building.id, values: payload })
         toast.success('Immeuble mis à jour')
       } else {
-        await createBuilding.mutateAsync(parsed)
+        await createBuilding.mutateAsync(payload)
         toast.success('Immeuble créé')
       }
       onOpenChange(false)
