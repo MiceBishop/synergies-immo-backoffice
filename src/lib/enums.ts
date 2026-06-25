@@ -5,6 +5,18 @@ import type { Enums } from './db'
  * faceted filters, and badges so the same value always renders the same way.
  */
 
+/**
+ * `tenants.tenant_type` is a free-text column in the DB (legacy reason) but
+ * the app constrains it to one of these two values.
+ */
+export const tenantTypeValues = ['individual', 'company'] as const
+export type TenantType = (typeof tenantTypeValues)[number]
+
+export const tenantTypeLabels: Record<TenantType, string> = {
+  individual: 'Personne physique',
+  company: 'Personne morale',
+}
+
 export const unitTypeLabels: Record<Enums<'unit_type'>, string> = {
   apartment: 'Appartement',
   office: 'Bureau',
