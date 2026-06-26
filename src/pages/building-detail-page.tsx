@@ -157,9 +157,9 @@ export function BuildingDetailPage() {
 
       <div className="space-y-3">
         <div>
-          <h2 className="text-xl font-semibold tracking-tight">Unités</h2>
+          <h2 className="text-xl font-semibold tracking-tight">Locaux</h2>
           <CardDescription>
-            Appartements, bureaux, commerces et autres unités de cet immeuble.
+            Appartements, bureaux, commerces et autres locaux de cet immeuble.
           </CardDescription>
         </div>
         <UnitsList buildingId={building.id} />
@@ -167,7 +167,7 @@ export function BuildingDetailPage() {
 
       <div className="space-y-3">
         <div>
-          <h2 className="text-xl font-semibold tracking-tight">Baux</h2>
+          <h2 className="text-xl font-semibold tracking-tight">Contrats</h2>
           <CardDescription>
             Contrats de location actifs et passés sur cet immeuble.
           </CardDescription>
@@ -186,7 +186,7 @@ export function BuildingDetailPage() {
         onConfirm={confirmDelete}
         loading={deleteBuilding.isPending}
         title="Supprimer cet immeuble ?"
-        description={`${building.name} sera définitivement supprimé. Toutes les unités liées seront également supprimées.`}
+        description={`${building.name} sera définitivement supprimé. Tous les locaux liés seront également supprimés.`}
       />
     </div>
   )

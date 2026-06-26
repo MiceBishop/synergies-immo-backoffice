@@ -47,7 +47,7 @@ type LeasesListProps = {
   tenantId?: string
   /** Scope rows to a single unit. */
   unitId?: string
-  /** Hide the Unité column when redundant (e.g. inside a building detail). */
+  /** Hide the local column when redundant (e.g. inside a building detail). */
   hideUnitColumn?: boolean
   /** Hide the Locataire column when redundant (e.g. inside a tenant detail). */
   hideTenantColumn?: boolean
@@ -106,7 +106,7 @@ export function LeasesList({
     if (!deleting) return
     try {
       await deleteLease.mutateAsync(deleting.id)
-      toast.success('Bail supprimé')
+      toast.success('Contrat supprimé')
       setDeleting(null)
     } catch (error) {
       toast.error('Échec de la suppression', {
@@ -130,7 +130,7 @@ export function LeasesList({
     if (!hideUnitColumn) {
       cols.push({
         accessorKey: 'unit_id',
-        header: 'Unité',
+        header: 'Local',
         enableSorting: false,
         cell: ({ row }) => {
           const unit = row.original.unit
@@ -260,8 +260,8 @@ export function LeasesList({
         }
         emptyMessage={
           hasActiveFilters
-            ? 'Aucun bail ne correspond aux filtres.'
-            : 'Aucun bail enregistré. Créez-en un pour commencer.'
+            ? 'Aucun contrat ne correspond aux filtres.'
+            : 'Aucun contrat enregistré. Créez-en un pour commencer.'
         }
         toolbar={
           <>
@@ -292,7 +292,7 @@ export function LeasesList({
         toolbarActions={
           <Button onClick={openCreate}>
             <Plus className="size-4" />
-            Nouveau bail
+            Nouveau contrat
           </Button>
         }
       />
@@ -307,10 +307,10 @@ export function LeasesList({
         onOpenChange={(open) => !open && setDeleting(null)}
         onConfirm={confirmDelete}
         loading={deleteLease.isPending}
-        title="Supprimer ce bail ?"
+        title="Supprimer ce contrat ?"
         description={
           deleting
-            ? `Le bail ${tenantLabel(deleting)} sera définitivement supprimé. Les paiements liés bloqueront la suppression si présents.`
+            ? `Le contrat ${tenantLabel(deleting)} sera définitivement supprimé. Les paiements liés bloqueront la suppression si présents.`
             : ''
         }
       />

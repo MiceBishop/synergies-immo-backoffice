@@ -197,7 +197,7 @@ export function TenantsPage() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Locataires</h1>
           <p className="text-muted-foreground">
-            Particuliers et entreprises titulaires de baux.
+            Particuliers et entreprises titulaires de contrats.
           </p>
         </div>
       </div>
@@ -274,7 +274,7 @@ export function TenantsPage() {
         title="Supprimer ce locataire ?"
         description={
           deleting
-            ? `${displayName(deleting)} sera définitivement supprimé. Les baux liés bloqueront la suppression si présents.`
+            ? `${displayName(deleting)} sera définitivement supprimé. Les contrats liés bloqueront la suppression si présents.`
             : ''
         }
       />

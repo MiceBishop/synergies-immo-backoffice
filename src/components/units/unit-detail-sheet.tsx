@@ -42,13 +42,13 @@ export function UnitDetailSheet({
           {isLoading ? (
             <>
               <SheetTitle>Chargement…</SheetTitle>
-              <SheetDescription>Récupération de l'unité.</SheetDescription>
+              <SheetDescription>Récupération du local.</SheetDescription>
             </>
           ) : isError || !unit ? (
             <>
-              <SheetTitle>Unité introuvable</SheetTitle>
+              <SheetTitle>Local introuvable</SheetTitle>
               <SheetDescription>
-                Le détail de cette unité n'a pas pu être chargé.
+                Le détail de ce local n'a pas pu être chargé.
               </SheetDescription>
             </>
           ) : (
@@ -134,9 +134,9 @@ export function UnitDetailSheet({
 
             <section className="space-y-3">
               <div>
-                <h3 className="text-sm font-medium">Baux</h3>
+                <h3 className="text-sm font-medium">Contrats</h3>
                 <p className="text-xs text-muted-foreground">
-                  Contrats de location sur cette unité.
+                  Contrats de location sur ce local.
                 </p>
               </div>
               <LeasesList unitId={unit.id} hideUnitColumn />

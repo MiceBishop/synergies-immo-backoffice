@@ -102,10 +102,10 @@ export function UnitFormDialog({
     try {
       if (unit) {
         await updateUnit.mutateAsync({ id: unit.id, values: payload })
-        toast.success('Unité mise à jour')
+        toast.success('Local mis à jour')
       } else {
         await createUnit.mutateAsync(payload)
-        toast.success('Unité créée')
+        toast.success('Local créé')
       }
       onOpenChange(false)
     } catch (error) {
@@ -119,9 +119,9 @@ export function UnitFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>{isEdit ? "Modifier l'unité" : 'Nouvelle unité'}</DialogTitle>
+          <DialogTitle>{isEdit ? 'Modifier le local' : 'Nouveau local'}</DialogTitle>
           <DialogDescription>
-            Renseignez les informations de l'unité (appartement, bureau, commerce…).
+            Renseignez les informations du local (appartement, bureau, commerce…).
           </DialogDescription>
         </DialogHeader>
 

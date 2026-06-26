@@ -163,7 +163,7 @@ export function TenantDetailPage() {
 
       <div className="space-y-3">
         <div>
-          <h2 className="text-xl font-semibold tracking-tight">Baux</h2>
+          <h2 className="text-xl font-semibold tracking-tight">Contrats</h2>
           <CardDescription>
             Contrats de location signés par ce locataire.
           </CardDescription>
@@ -182,7 +182,7 @@ export function TenantDetailPage() {
         onConfirm={confirmDelete}
         loading={deleteTenant.isPending}
         title="Supprimer ce locataire ?"
-        description={`${displayName} sera définitivement supprimé. Les baux liés bloqueront la suppression si présents.`}
+        description={`${displayName} sera définitivement supprimé. Les contrats liés bloqueront la suppression si présents.`}
       />
     </div>
   )

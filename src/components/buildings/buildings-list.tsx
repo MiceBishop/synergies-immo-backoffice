@@ -320,7 +320,7 @@ export function BuildingsList({
         title="Supprimer cet immeuble ?"
         description={
           deleting
-            ? `${deleting.name} sera définitivement supprimé. Toutes les unités liées seront également supprimées.`
+            ? `${deleting.name} sera définitivement supprimé. Tous les locaux liés seront également supprimés.`
             : ''
         }
       />

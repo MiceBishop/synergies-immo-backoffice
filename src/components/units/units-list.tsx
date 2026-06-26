@@ -82,7 +82,7 @@ export function UnitsList({ buildingId }: UnitsListProps) {
     if (!deleting) return
     try {
       await deleteUnit.mutateAsync(deleting.id)
-      toast.success('Unité supprimée')
+      toast.success('Local supprimé')
       setDeleting(null)
     } catch (error) {
       toast.error('Échec de la suppression', {
@@ -201,8 +201,8 @@ export function UnitsList({ buildingId }: UnitsListProps) {
         onRowClick={(row) => setDetailId(row.id)}
         emptyMessage={
           hasActiveFilters
-            ? 'Aucune unité ne correspond aux filtres.'
-            : "Aucune unité enregistrée pour cet immeuble. Ajoutez-en une pour commencer."
+            ? 'Aucun local ne correspond aux filtres.'
+            : "Aucun local enregistré pour cet immeuble. Ajoutez-en un pour commencer."
         }
         toolbar={
           <>
@@ -243,7 +243,7 @@ export function UnitsList({ buildingId }: UnitsListProps) {
         toolbarActions={
           <Button onClick={openCreate}>
             <Plus className="size-4" />
-            Ajouter une unité
+            Ajouter un local
           </Button>
         }
       />
@@ -271,10 +271,10 @@ export function UnitsList({ buildingId }: UnitsListProps) {
         onOpenChange={(open) => !open && setDeleting(null)}
         onConfirm={confirmDelete}
         loading={deleteUnit.isPending}
-        title="Supprimer cette unité ?"
+        title="Supprimer ce local ?"
         description={
           deleting
-            ? `${deleting.reference} sera définitivement supprimée. Les baux liés bloqueront la suppression si présents.`
+            ? `${deleting.reference} sera définitivement supprimé. Les contrats liés bloqueront la suppression si présents.`
             : ''
         }
       />
