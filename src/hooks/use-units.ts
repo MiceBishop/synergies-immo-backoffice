@@ -12,6 +12,22 @@ export type UnitWithBuilding = Unit & {
 
 const unitsKey = ['units'] as const
 
+export function useUnit(id: string | null | undefined) {
+  return useQuery({
+    enabled: Boolean(id),
+    queryKey: [...unitsKey, 'one', id],
+    queryFn: async (): Promise<UnitWithBuilding> => {
+      const { data, error } = await supabase
+        .from('units')
+        .select('*, building:buildings(id, name)')
+        .eq('id', id!)
+        .single()
+      if (error) throw error
+      return data as unknown as UnitWithBuilding
+    },
+  })
+}
+
 /**
  * Full non-paginated list of units, joined with their building. Used by FK
  * pickers (lease form). For the per-building list, use `useUnitsList`.

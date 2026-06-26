@@ -23,15 +23,36 @@ const leasesKey = ['leases'] as const
 const LEASE_SELECT =
   'id, unit_id, tenant_id, start_date, end_date, rent_excl_tax, vat_rate, vat_amount, rent_incl_tax, deposit, deposit_returned, auto_renew, status, special_conditions, created_at, updated_at, tenant:tenants(id, first_name, last_name, tenant_type), unit:units(id, reference, type, status, building:buildings(id, name))'
 
+// When scoping by building we need an inner join on units so PostgREST can apply
+// the .eq('unit.building_id', …) filter on the embedded relation.
+const LEASE_SELECT_BUILDING_SCOPED = LEASE_SELECT.replace(
+  'unit:units(',
+  'unit:units!inner('
+)
+
 type LeasesListParams = {
   state: DataTableState
   statusFilter?: Enums<'lease_status'>[]
   startFrom?: string | null
   startTo?: string | null
+  /** Scope to leases whose unit belongs to this building. */
+  buildingId?: string
+  /** Scope to leases belonging to this tenant. */
+  tenantId?: string
+  /** Scope to leases on a single unit. */
+  unitId?: string
 }
 
 export function useLeasesList(params: LeasesListParams) {
-  const { state, statusFilter, startFrom, startTo } = params
+  const {
+    state,
+    statusFilter,
+    startFrom,
+    startTo,
+    buildingId,
+    tenantId,
+    unitId,
+  } = params
 
   return useQuery({
     queryKey: [
@@ -44,13 +65,28 @@ export function useLeasesList(params: LeasesListParams) {
         statusFilter: statusFilter ?? [],
         startFrom: startFrom ?? null,
         startTo: startTo ?? null,
+        buildingId: buildingId ?? null,
+        tenantId: tenantId ?? null,
+        unitId: unitId ?? null,
       },
     ],
     queryFn: async (): Promise<{ rows: LeaseRow[]; total: number }> => {
+      const select = buildingId ? LEASE_SELECT_BUILDING_SCOPED : LEASE_SELECT
       let query = supabase
         .from('leases')
-        .select(LEASE_SELECT, { count: 'exact' })
+        .select(select, { count: 'exact' })
 
+      if (buildingId) {
+        // PostgREST embedded-resource filter — applied on the aliased unit
+        // relation that we marked !inner above.
+        query = query.eq('unit.building_id', buildingId)
+      }
+      if (tenantId) {
+        query = query.eq('tenant_id', tenantId)
+      }
+      if (unitId) {
+        query = query.eq('unit_id', unitId)
+      }
       if (statusFilter && statusFilter.length > 0) {
         query = query.in('status', statusFilter)
       }

@@ -1,6 +1,13 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
-import { MoreHorizontal, Pencil, Plus, Search, Trash2, X } from 'lucide-react'
+import {
+  MoreHorizontal,
+  Pencil,
+  Plus,
+  Search,
+  Trash2,
+  X,
+} from 'lucide-react'
 import { toast } from 'sonner'
 import type { ColumnDef } from '@tanstack/react-table'
 import { Button } from '@/components/ui/button'
@@ -15,59 +22,88 @@ import {
   DataTable,
   DataTableColumnHeader,
   DataTableDateRangeFilter,
+  DataTableFacetedFilter,
   useDataTableState,
   type DateRangeValue,
+  type FacetOption,
 } from '@/components/shared/data-table'
 import { ConfirmDeleteDialog } from '@/components/shared/confirm-delete-dialog'
-import { OwnerFormDialog } from '@/components/owners/owner-form-dialog'
+import { BuildingFormDialog } from '@/components/buildings/building-form-dialog'
 import {
-  useOwnersList,
-  useDeleteOwner,
-  type Owner,
-} from '@/hooks/use-owners'
+  useBuildingsList,
+  useBuildingCities,
+  useDeleteBuilding,
+  type BuildingRow,
+  type Building,
+} from '@/hooks/use-buildings'
+import { useOwners } from '@/hooks/use-owners'
 import { formatDate } from '@/lib/format'
 
-export function OwnersPage() {
+type BuildingsListProps = {
+  /** Scope rows to a single owner — used by the owner detail page. */
+  ownerId?: string
+  /** Hide the Propriétaire column when redundant (e.g. inside an owner detail). */
+  hideOwnerColumn?: boolean
+}
+
+export function BuildingsList({
+  ownerId,
+  hideOwnerColumn = false,
+}: BuildingsListProps) {
   const navigate = useNavigate()
+  const scoped = Boolean(ownerId)
+
   const [state, setState] = useDataTableState({
-    sorting: [{ id: 'last_name', desc: false }],
+    sorting: [{ id: 'name', desc: false }],
   })
   const [search, setSearch] = useState('')
+  const [cityFilter, setCityFilter] = useState<string[]>([])
+  const [ownerFilter, setOwnerFilter] = useState<string[]>([])
   const [created, setCreated] = useState<DateRangeValue>({ from: null, to: null })
 
   const [formOpen, setFormOpen] = useState(false)
-  const [editing, setEditing] = useState<Owner | null>(null)
-  const [deleting, setDeleting] = useState<Owner | null>(null)
+  const [editing, setEditing] = useState<Building | null>(null)
+  const [deleting, setDeleting] = useState<BuildingRow | null>(null)
 
   const stateForQuery = useMemo(
     () => ({ ...state, globalFilter: search }),
     [state, search]
   )
 
-  const { data, isLoading, isError } = useOwnersList({
+  const { data, isLoading, isError } = useBuildingsList({
     state: stateForQuery,
+    cityFilter,
+    ownerIdFilter: ownerId ? [ownerId] : ownerFilter,
     createdFrom: created.from,
     createdTo: created.to,
   })
-  const deleteOwner = useDeleteOwner()
+  const { data: cities } = useBuildingCities()
+  const { data: owners } = useOwners()
+  const deleteBuilding = useDeleteBuilding()
 
-  const fullName = (o: Owner) =>
-    [o.first_name, o.last_name].filter(Boolean).join(' ')
+  const cityOptions: FacetOption[] = (cities ?? []).map((c) => ({
+    label: c,
+    value: c,
+  }))
+  const ownerOptions: FacetOption[] = (owners ?? []).map((o) => ({
+    label: [o.first_name, o.last_name].filter(Boolean).join(' '),
+    value: o.id,
+  }))
 
   const openCreate = () => {
     setEditing(null)
     setFormOpen(true)
   }
-  const openEdit = (owner: Owner) => {
-    setEditing(owner)
+  const openEdit = (b: Building) => {
+    setEditing(b)
     setFormOpen(true)
   }
 
   const confirmDelete = async () => {
     if (!deleting) return
     try {
-      await deleteOwner.mutateAsync(deleting.id)
-      toast.success('Propriétaire supprimé')
+      await deleteBuilding.mutateAsync(deleting.id)
+      toast.success('Immeuble supprimé')
       setDeleting(null)
     } catch (error) {
       toast.error('Échec de la suppression', {
@@ -77,50 +113,85 @@ export function OwnersPage() {
   }
 
   const hasActiveFilters =
-    Boolean(search) || Boolean(created.from || created.to)
+    Boolean(search) ||
+    cityFilter.length > 0 ||
+    (!scoped && ownerFilter.length > 0) ||
+    Boolean(created.from || created.to)
 
   const resetFilters = () => {
     setSearch('')
+    setCityFilter([])
+    if (!scoped) setOwnerFilter([])
     setCreated({ from: null, to: null })
     setState({ page: 1 })
   }
 
-  const columns = useMemo<ColumnDef<Owner>[]>(
-    () => [
+  const columns = useMemo<ColumnDef<BuildingRow>[]>(() => {
+    const cols: ColumnDef<BuildingRow>[] = [
       {
-        accessorKey: 'last_name',
+        accessorKey: 'name',
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title="Nom" />
         ),
         cell: ({ row }) => (
           <Link
-            to="/owners/$id"
+            to="/buildings/$id"
             params={{ id: row.original.id }}
             onClick={(e) => e.stopPropagation()}
             className="font-medium hover:underline"
           >
-            {fullName(row.original)}
+            {row.original.name}
           </Link>
         ),
       },
       {
-        accessorKey: 'email',
+        accessorKey: 'address',
+        header: 'Adresse',
+        enableSorting: false,
+        cell: ({ row }) => row.original.address,
+      },
+      {
+        accessorKey: 'city',
         header: ({ column }) => (
-          <DataTableColumnHeader column={column} title="E-mail" />
+          <DataTableColumnHeader column={column} title="Ville" />
         ),
-        cell: ({ row }) => row.original.email ?? '—',
       },
-      {
-        accessorKey: 'phone',
-        header: 'Téléphone',
+    ]
+
+    if (!hideOwnerColumn) {
+      cols.push({
+        id: 'owner',
+        header: 'Propriétaire',
         enableSorting: false,
-        cell: ({ row }) => row.original.phone ?? '—',
-      },
+        cell: ({ row }) => {
+          const owner = row.original.owner
+          if (!owner) return '—'
+          const name = [owner.first_name, owner.last_name]
+            .filter(Boolean)
+            .join(' ')
+          return (
+            <Link
+              to="/owners/$id"
+              params={{ id: owner.id }}
+              onClick={(e) => e.stopPropagation()}
+              className="hover:underline"
+            >
+              {name}
+            </Link>
+          )
+        },
+      })
+    }
+
+    cols.push(
       {
-        accessorKey: 'tax_id',
-        header: 'NINEA',
-        enableSorting: false,
-        cell: ({ row }) => row.original.tax_id ?? '—',
+        accessorKey: 'floor_count',
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Étages" align="right" />
+        ),
+        cell: ({ row }) => (
+          <div className="text-right">{row.original.floor_count ?? '—'}</div>
+        ),
       },
       {
         accessorKey: 'created_at',
@@ -157,22 +228,14 @@ export function OwnersPage() {
             </DropdownMenu>
           </div>
         ),
-      },
-    ],
-    []
-  )
+      }
+    )
+
+    return cols
+  }, [hideOwnerColumn])
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Propriétaires</h1>
-          <p className="text-muted-foreground">
-            Gérez les propriétaires des immeubles.
-          </p>
-        </div>
-      </div>
-
+    <>
       <DataTable
         columns={columns}
         state={state}
@@ -182,24 +245,42 @@ export function OwnersPage() {
         isLoading={isLoading}
         isError={isError}
         onRowClick={(row) =>
-          navigate({ to: '/owners/$id', params: { id: row.id } })
+          navigate({ to: '/buildings/$id', params: { id: row.id } })
         }
         emptyMessage={
           hasActiveFilters
-            ? 'Aucun propriétaire ne correspond aux filtres.'
-            : 'Aucun propriétaire enregistré. Ajoutez-en un pour commencer.'
+            ? 'Aucun immeuble ne correspond aux filtres.'
+            : scoped
+              ? 'Aucun immeuble pour ce propriétaire.'
+              : 'Aucun immeuble enregistré. Ajoutez-en un pour commencer.'
         }
         toolbar={
           <>
             <div className="relative w-full max-w-xs">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
               <Input
-                placeholder="Rechercher par nom, e-mail ou téléphone…"
+                placeholder="Rechercher par nom ou adresse…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-9 h-9"
               />
             </div>
+            {cityOptions.length > 0 && (
+              <DataTableFacetedFilter
+                title="Ville"
+                options={cityOptions}
+                selected={cityFilter}
+                onChange={setCityFilter}
+              />
+            )}
+            {!scoped && ownerOptions.length > 0 && (
+              <DataTableFacetedFilter
+                title="Propriétaire"
+                options={ownerOptions}
+                selected={ownerFilter}
+                onChange={setOwnerFilter}
+              />
+            )}
             <DataTableDateRangeFilter
               title="Créé entre"
               value={created}
@@ -221,24 +302,28 @@ export function OwnersPage() {
         toolbarActions={
           <Button onClick={openCreate}>
             <Plus className="size-4" />
-            Ajouter un propriétaire
+            Ajouter un immeuble
           </Button>
         }
       />
 
-      <OwnerFormDialog open={formOpen} onOpenChange={setFormOpen} owner={editing} />
+      <BuildingFormDialog
+        open={formOpen}
+        onOpenChange={setFormOpen}
+        building={editing}
+      />
       <ConfirmDeleteDialog
         open={Boolean(deleting)}
         onOpenChange={(open) => !open && setDeleting(null)}
         onConfirm={confirmDelete}
-        loading={deleteOwner.isPending}
-        title="Supprimer ce propriétaire ?"
+        loading={deleteBuilding.isPending}
+        title="Supprimer cet immeuble ?"
         description={
           deleting
-            ? `${fullName(deleting)} sera définitivement supprimé. Les immeubles liés ne seront pas supprimés mais perdront leur propriétaire.`
+            ? `${deleting.name} sera définitivement supprimé. Tous les locaux liés seront également supprimés.`
             : ''
         }
       />
-    </div>
+    </>
   )
 }

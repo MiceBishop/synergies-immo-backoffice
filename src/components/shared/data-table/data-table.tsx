@@ -33,6 +33,7 @@ export function DataTable<TRow>({
   errorMessage = 'Erreur lors du chargement.',
   toolbar,
   toolbarActions,
+  onRowClick,
 }: DataTableProps<TRow>) {
   const pageCount = useMemo(
     () => Math.max(1, Math.ceil(total / state.pageSize)),
@@ -132,7 +133,15 @@ export function DataTable<TRow>({
               </TableRow>
             ) : (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
+                <TableRow
+                  key={row.id}
+                  onClick={
+                    onRowClick ? () => onRowClick(row.original) : undefined
+                  }
+                  className={
+                    onRowClick ? 'cursor-pointer hover:bg-muted/50' : undefined
+                  }
+                >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}

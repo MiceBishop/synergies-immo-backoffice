@@ -32,14 +32,14 @@ export function DataTableColumnHeader<TData, TValue>({
 
   const sorted = column.getIsSorted()
 
-  return (
+  const button = (
     <Button
       variant="ghost"
       size="sm"
       onClick={() => column.toggleSorting(sorted === 'asc')}
       className={cn(
-        '-ml-3 h-8 data-[state=open]:bg-accent',
-        align === 'right' && 'ml-auto -mr-3',
+        'h-8 data-[state=open]:bg-accent',
+        align === 'right' ? '-mr-3' : '-ml-3',
         className
       )}
     >
@@ -53,4 +53,12 @@ export function DataTableColumnHeader<TData, TValue>({
       )}
     </Button>
   )
+
+  // TableHead is not a flex container by default, so `ml-auto` on the button
+  // alone doesn't right-align it. Wrap in a flex container when needed.
+  if (align === 'right') {
+    return <div className="flex justify-end">{button}</div>
+  }
+
+  return button
 }

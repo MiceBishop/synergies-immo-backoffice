@@ -96,6 +96,22 @@ export function useOwnersList(params: OwnersListParams) {
   })
 }
 
+export function useOwner(id: string | null | undefined) {
+  return useQuery({
+    enabled: Boolean(id),
+    queryKey: [...ownersKey, 'one', id],
+    queryFn: async (): Promise<Owner> => {
+      const { data, error } = await supabase
+        .from('owners')
+        .select('*')
+        .eq('id', id!)
+        .single()
+      if (error) throw error
+      return data
+    },
+  })
+}
+
 export function useCreateOwner() {
   const queryClient = useQueryClient()
   return useMutation({

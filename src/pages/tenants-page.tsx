@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Link, useNavigate } from '@tanstack/react-router'
 import {
   MoreHorizontal,
   Pencil,
@@ -40,6 +41,7 @@ import { tenantTypeLabels, enumOptions, type TenantType } from '@/lib/enums'
 const typeOptions: FacetOption[] = enumOptions(tenantTypeLabels)
 
 export function TenantsPage() {
+  const navigate = useNavigate()
   const [state, setState] = useDataTableState({
     sorting: [{ id: 'last_name', desc: false }],
   })
@@ -114,7 +116,14 @@ export function TenantsPage() {
           <DataTableColumnHeader column={column} title="Nom" />
         ),
         cell: ({ row }) => (
-          <span className="font-medium">{displayName(row.original)}</span>
+          <Link
+            to="/tenants/$id"
+            params={{ id: row.original.id }}
+            onClick={(e) => e.stopPropagation()}
+            className="font-medium hover:underline"
+          >
+            {displayName(row.original)}
+          </Link>
         ),
       },
       {
@@ -154,26 +163,28 @@ export function TenantsPage() {
         header: () => null,
         enableSorting: false,
         cell: ({ row }) => (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="size-8">
-                <MoreHorizontal className="size-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onSelect={() => openEdit(row.original)}>
-                <Pencil className="mr-2 size-4" />
-                Modifier
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onSelect={() => setDeleting(row.original)}
-                className="text-destructive focus:text-destructive"
-              >
-                <Trash2 className="mr-2 size-4" />
-                Supprimer
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div onClick={(e) => e.stopPropagation()}>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="size-8">
+                  <MoreHorizontal className="size-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onSelect={() => openEdit(row.original)}>
+                  <Pencil className="mr-2 size-4" />
+                  Modifier
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={() => setDeleting(row.original)}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <Trash2 className="mr-2 size-4" />
+                  Supprimer
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         ),
       },
     ],
@@ -186,7 +197,7 @@ export function TenantsPage() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Locataires</h1>
           <p className="text-muted-foreground">
-            Particuliers et entreprises titulaires de baux.
+            Particuliers et entreprises titulaires de contrats.
           </p>
         </div>
       </div>
@@ -199,6 +210,9 @@ export function TenantsPage() {
         total={data?.total ?? 0}
         isLoading={isLoading}
         isError={isError}
+        onRowClick={(row) =>
+          navigate({ to: '/tenants/$id', params: { id: row.id } })
+        }
         emptyMessage={
           hasActiveFilters
             ? 'Aucun locataire ne correspond aux filtres.'
@@ -260,7 +274,7 @@ export function TenantsPage() {
         title="Supprimer ce locataire ?"
         description={
           deleting
-            ? `${displayName(deleting)} sera définitivement supprimé. Les baux liés bloqueront la suppression si présents.`
+            ? `${displayName(deleting)} sera définitivement supprimé. Les contrats liés bloqueront la suppression si présents.`
             : ''
         }
       />

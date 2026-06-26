@@ -169,10 +169,10 @@ export function LeaseFormDialog({
     try {
       if (lease) {
         await updateLease.mutateAsync({ id: lease.id, values: payload })
-        toast.success('Bail mis à jour')
+        toast.success('Contrat mis à jour')
       } else {
         await createLease.mutateAsync(payload)
-        toast.success('Bail créé')
+        toast.success('Contrat créé')
       }
       onOpenChange(false)
     } catch (error) {
@@ -186,29 +186,29 @@ export function LeaseFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{isEdit ? 'Modifier le bail' : 'Nouveau bail'}</DialogTitle>
+          <DialogTitle>{isEdit ? 'Modifier le contrat' : 'Nouveau contrat'}</DialogTitle>
           <DialogDescription>
-            Renseignez l'unité, le locataire, et les conditions financières.
+            Renseignez le local, le locataire, et les conditions financières.
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
           <form onSubmit={onSubmit} className="space-y-6">
             <section className="space-y-4">
-              <h3 className="text-sm font-medium">Unité et locataire</h3>
+              <h3 className="text-sm font-medium">Local et locataire</h3>
               <FormField
                 control={form.control}
                 name="unit_id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Unité *</FormLabel>
+                    <FormLabel>Local *</FormLabel>
                     <FormControl>
                       <Combobox
                         options={unitOptions}
                         value={field.value || null}
                         onChange={(v) => field.onChange(v ?? '')}
-                        placeholder="Choisir une unité"
-                        emptyMessage="Aucune unité enregistrée."
+                        placeholder="Choisir un local"
+                        emptyMessage="Aucun local enregistré."
                         clearable={false}
                       />
                     </FormControl>
@@ -396,7 +396,7 @@ export function LeaseFormDialog({
                     <div className="space-y-0.5">
                       <FormLabel className="text-sm">Reconduction automatique</FormLabel>
                       <FormDescription>
-                        Le bail se renouvelle automatiquement à l'échéance.
+                        Le contrat se renouvelle automatiquement à l'échéance.
                       </FormDescription>
                     </div>
                     <FormControl>

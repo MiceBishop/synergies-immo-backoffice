@@ -11,9 +11,11 @@ import { AppShell } from '@/components/layout/app-shell'
 import { LoginPage } from '@/pages/login-page'
 import { DashboardPage } from '@/pages/dashboard-page'
 import { OwnersPage } from '@/pages/owners-page'
+import { OwnerDetailPage } from '@/pages/owner-detail-page'
 import { BuildingsPage } from '@/pages/buildings-page'
 import { BuildingDetailPage } from '@/pages/building-detail-page'
 import { TenantsPage } from '@/pages/tenants-page'
+import { TenantDetailPage } from '@/pages/tenant-detail-page'
 import { LeasesPage } from '@/pages/leases-page'
 import { LeaseDetailPage } from '@/pages/lease-detail-page'
 import { SettingsPage } from '@/pages/settings-page'
@@ -65,6 +67,12 @@ const ownersRoute = createRoute({
   component: OwnersPage,
 })
 
+const ownerDetailRoute = createRoute({
+  getParentRoute: () => appLayoutRoute,
+  path: '/owners/$id',
+  component: OwnerDetailPage,
+})
+
 const buildingsRoute = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: '/buildings',
@@ -81,6 +89,12 @@ const tenantsRoute = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: '/tenants',
   component: TenantsPage,
+})
+
+const tenantDetailRoute = createRoute({
+  getParentRoute: () => appLayoutRoute,
+  path: '/tenants/$id',
+  component: TenantDetailPage,
 })
 
 const leasesRoute = createRoute({
@@ -106,9 +120,11 @@ const routeTree = rootRoute.addChildren([
   appLayoutRoute.addChildren([
     dashboardRoute,
     ownersRoute,
+    ownerDetailRoute,
     buildingsRoute,
     buildingDetailRoute,
     tenantsRoute,
+    tenantDetailRoute,
     leasesRoute,
     leaseDetailRoute,
     settingsRoute,

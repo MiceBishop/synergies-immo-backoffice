@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from '@tanstack/react-router'
-import { ArrowLeft, Building2, MapPin, Pencil, Trash2, UserSquare } from 'lucide-react'
+import { ArrowLeft, Mail, MapPin, Pencil, Phone, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
@@ -12,27 +12,29 @@ import {
 } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { ConfirmDeleteDialog } from '@/components/shared/confirm-delete-dialog'
-import { BuildingFormDialog } from '@/components/buildings/building-form-dialog'
+import { TenantFormDialog } from '@/components/tenants/tenant-form-dialog'
+import { TenantTypeBadge } from '@/components/tenants/tenant-type-badge'
 import { LeasesList } from '@/components/leases/leases-list'
-import { UnitsList } from '@/components/units/units-list'
-import { useBuilding, useDeleteBuilding } from '@/hooks/use-buildings'
-import { formatDate } from '@/lib/format'
+import {
+  useTenant,
+  useDeleteTenant,
+} from '@/hooks/use-tenants'
 
-export function BuildingDetailPage() {
-  const { id } = useParams({ from: '/app/buildings/$id' })
+export function TenantDetailPage() {
+  const { id } = useParams({ from: '/app/tenants/$id' })
   const navigate = useNavigate()
-  const { data: building, isLoading, isError } = useBuilding(id)
-  const deleteBuilding = useDeleteBuilding()
+  const { data: tenant, isLoading, isError } = useTenant(id)
+  const deleteTenant = useDeleteTenant()
 
   const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
 
   const confirmDelete = async () => {
-    if (!building) return
+    if (!tenant) return
     try {
-      await deleteBuilding.mutateAsync(building.id)
-      toast.success('Immeuble supprimé')
-      navigate({ to: '/buildings' })
+      await deleteTenant.mutateAsync(tenant.id)
+      toast.success('Locataire supprimé')
+      navigate({ to: '/tenants' })
     } catch (error) {
       toast.error('Échec de la suppression', {
         description: error instanceof Error ? error.message : undefined,
@@ -49,24 +51,23 @@ export function BuildingDetailPage() {
     )
   }
 
-  if (isError || !building) {
+  if (isError || !tenant) {
     return (
       <div className="space-y-6">
         <BackLink />
         <Card>
           <CardContent className="py-10 text-center">
-            <p className="text-destructive">Immeuble introuvable.</p>
+            <p className="text-destructive">Locataire introuvable.</p>
           </CardContent>
         </Card>
       </div>
     )
   }
 
-  const ownerName = building.owner
-    ? [building.owner.first_name, building.owner.last_name]
-        .filter(Boolean)
-        .join(' ')
-    : null
+  const isCompany = tenant.tenant_type === 'company'
+  const displayName = isCompany
+    ? tenant.last_name
+    : [tenant.first_name, tenant.last_name].filter(Boolean).join(' ')
 
   return (
     <div className="space-y-6">
@@ -74,13 +75,20 @@ export function BuildingDetailPage() {
 
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-2xl font-semibold tracking-tight">{building.name}</h1>
-          <p className="text-muted-foreground flex items-center gap-1.5">
-            <MapPin className="size-4" />
-            {building.address}, {building.city}
-          </p>
+          <div className="flex items-center gap-3 flex-wrap">
+            <h1 className="text-2xl font-semibold tracking-tight">
+              {displayName}
+            </h1>
+            <TenantTypeBadge type={tenant.tenant_type} />
+          </div>
+          {tenant.email && (
+            <p className="text-muted-foreground flex items-center gap-1.5">
+              <Mail className="size-4" />
+              {tenant.email}
+            </p>
+          )}
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <Button variant="outline" onClick={() => setEditOpen(true)}>
             <Pencil className="size-4" />
             Modifier
@@ -104,50 +112,48 @@ export function BuildingDetailPage() {
           <dl className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
             <div>
               <dt className="text-muted-foreground flex items-center gap-1.5">
-                <UserSquare className="size-3.5" />
-                Propriétaire
+                <Phone className="size-3.5" />
+                Téléphone
               </dt>
-              <dd className="font-medium mt-0.5">
-                {building.owner ? (
-                  <Link
-                    to="/owners/$id"
-                    params={{ id: building.owner.id }}
-                    className="hover:underline"
-                  >
-                    {ownerName}
-                  </Link>
-                ) : (
-                  '—'
-                )}
-              </dd>
+              <dd className="font-medium mt-0.5">{tenant.phone}</dd>
             </div>
             <div>
               <dt className="text-muted-foreground flex items-center gap-1.5">
-                <Building2 className="size-3.5" />
-                Étages
+                <Mail className="size-3.5" />
+                E-mail
               </dt>
-              <dd className="font-medium mt-0.5">{building.floor_count ?? '—'}</dd>
+              <dd className="font-medium mt-0.5">{tenant.email ?? '—'}</dd>
             </div>
             <div>
-              <dt className="text-muted-foreground">Créé le</dt>
-              <dd className="font-medium mt-0.5">
-                {formatDate(building.created_at)}
-              </dd>
+              <dt className="text-muted-foreground">
+                {isCompany ? 'RC' : 'CIN'}
+              </dt>
+              <dd className="font-medium mt-0.5">{tenant.national_id ?? '—'}</dd>
             </div>
             <div>
-              <dt className="text-muted-foreground">Mis à jour</dt>
-              <dd className="font-medium mt-0.5">
-                {formatDate(building.updated_at)}
-              </dd>
+              <dt className="text-muted-foreground">NINEA</dt>
+              <dd className="font-medium mt-0.5">{tenant.tax_id ?? '—'}</dd>
             </div>
           </dl>
-          {building.notes && (
+          {tenant.previous_address && (
+            <>
+              <Separator className="my-4" />
+              <div>
+                <dt className="text-muted-foreground text-sm flex items-center gap-1.5">
+                  <MapPin className="size-3.5" />
+                  {isCompany ? 'Siège social' : 'Adresse précédente'}
+                </dt>
+                <dd className="mt-1 text-sm">{tenant.previous_address}</dd>
+              </div>
+            </>
+          )}
+          {tenant.notes && (
             <>
               <Separator className="my-4" />
               <div>
                 <dt className="text-muted-foreground text-sm">Notes</dt>
                 <dd className="mt-1 text-sm whitespace-pre-wrap">
-                  {building.notes}
+                  {tenant.notes}
                 </dd>
               </div>
             </>
@@ -157,36 +163,26 @@ export function BuildingDetailPage() {
 
       <div className="space-y-3">
         <div>
-          <h2 className="text-xl font-semibold tracking-tight">Locaux</h2>
-          <CardDescription>
-            Appartements, bureaux, commerces et autres locaux de cet immeuble.
-          </CardDescription>
-        </div>
-        <UnitsList buildingId={building.id} />
-      </div>
-
-      <div className="space-y-3">
-        <div>
           <h2 className="text-xl font-semibold tracking-tight">Contrats</h2>
           <CardDescription>
-            Contrats de location actifs et passés sur cet immeuble.
+            Contrats de location signés par ce locataire.
           </CardDescription>
         </div>
-        <LeasesList buildingId={building.id} />
+        <LeasesList tenantId={tenant.id} hideTenantColumn />
       </div>
 
-      <BuildingFormDialog
+      <TenantFormDialog
         open={editOpen}
         onOpenChange={setEditOpen}
-        building={building}
+        tenant={tenant}
       />
       <ConfirmDeleteDialog
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
         onConfirm={confirmDelete}
-        loading={deleteBuilding.isPending}
-        title="Supprimer cet immeuble ?"
-        description={`${building.name} sera définitivement supprimé. Tous les locaux liés seront également supprimés.`}
+        loading={deleteTenant.isPending}
+        title="Supprimer ce locataire ?"
+        description={`${displayName} sera définitivement supprimé. Les contrats liés bloqueront la suppression si présents.`}
       />
     </div>
   )
@@ -195,11 +191,11 @@ export function BuildingDetailPage() {
 function BackLink() {
   return (
     <Link
-      to="/buildings"
+      to="/tenants"
       className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
     >
       <ArrowLeft className="size-4" />
-      Retour à la liste
+      Retour aux locataires
     </Link>
   )
 }

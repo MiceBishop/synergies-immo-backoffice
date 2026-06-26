@@ -42,7 +42,7 @@ export function LeaseDetailPage() {
     if (!lease) return
     try {
       await deleteLease.mutateAsync(lease.id)
-      toast.success('Bail supprimé')
+      toast.success('Contrat supprimé')
       navigate({ to: '/leases' })
     } catch (error) {
       toast.error('Échec de la suppression', {
@@ -56,7 +56,7 @@ export function LeaseDetailPage() {
     try {
       await updateStatus.mutateAsync({ id: lease.id, status })
       toast.success(
-        status === 'active' ? 'Bail activé' : 'Bail résilié'
+        status === 'active' ? 'Contrat activé' : 'Contrat résilié'
       )
     } catch (error) {
       toast.error('Échec de la mise à jour', {
@@ -80,7 +80,7 @@ export function LeaseDetailPage() {
         <BackLink />
         <Card>
           <CardContent className="py-10 text-center">
-            <p className="text-destructive">Bail introuvable.</p>
+            <p className="text-destructive">Contrat introuvable.</p>
           </CardContent>
         </Card>
       </div>
@@ -110,12 +110,43 @@ export function LeaseDetailPage() {
         <div className="space-y-1">
           <div className="flex items-center gap-3 flex-wrap">
             <h1 className="text-2xl font-semibold tracking-tight">
-              Bail — {tenantName}
+              Contrat —{' '}
+              {lease.tenant ? (
+                <Link
+                  to="/tenants/$id"
+                  params={{ id: lease.tenant.id }}
+                  className="hover:underline"
+                >
+                  {tenantName}
+                </Link>
+              ) : (
+                tenantName
+              )}
             </h1>
             <LeaseStatusBadge status={lease.status} />
           </div>
           <p className="text-muted-foreground">
-            {unitLabel} · {formatDate(lease.start_date)}
+            {lease.unit ? (
+              <>
+                <span className="font-medium">{lease.unit.reference}</span>
+                {lease.unit.building && (
+                  <>
+                    {' — '}
+                    <Link
+                      to="/buildings/$id"
+                      params={{ id: lease.unit.building.id }}
+                      className="hover:underline"
+                    >
+                      {lease.unit.building.name}
+                    </Link>
+                  </>
+                )}
+              </>
+            ) : (
+              unitLabel
+            )}
+            {' · '}
+            {formatDate(lease.start_date)}
             {lease.end_date ? ` → ${formatDate(lease.end_date)}` : ' (sans fin)'}
           </p>
         </div>
@@ -126,7 +157,7 @@ export function LeaseDetailPage() {
               disabled={updateStatus.isPending}
             >
               <CheckCircle2 className="size-4" />
-              Activer le bail
+              Activer le contrat
             </Button>
           )}
           {canTerminate && (
@@ -229,7 +260,7 @@ export function LeaseDetailPage() {
         onOpenChange={setDeleteOpen}
         onConfirm={confirmDelete}
         loading={deleteLease.isPending}
-        title="Supprimer ce bail ?"
+        title="Supprimer ce contrat ?"
         description="Cette action est irréversible. Les paiements liés bloqueront la suppression si présents."
       />
     </div>
@@ -262,7 +293,7 @@ function BackLink() {
       className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
     >
       <ArrowLeft className="size-4" />
-      Retour aux baux
+      Retour aux contrats
     </Link>
   )
 }

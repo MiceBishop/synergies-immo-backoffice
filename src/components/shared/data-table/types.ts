@@ -37,6 +37,12 @@ export type DataTableProps<TRow> = {
   toolbar?: React.ReactNode
   /** Optional right-aligned actions (e.g. an "Add" button) next to the toolbar. */
   toolbarActions?: React.ReactNode
+  /**
+   * If set, each row becomes clickable (cursor pointer) and invokes this with
+   * the row data. Interactive children (links, dropdown triggers, buttons)
+   * inside cells must call `e.stopPropagation()` to avoid double-firing.
+   */
+  onRowClick?: (row: TRow) => void
 }
 
 export const DEFAULT_PAGE_SIZE = 25

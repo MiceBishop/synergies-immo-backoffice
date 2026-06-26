@@ -23,7 +23,7 @@ const optionalText = z
 
 export const leaseSchema = z
   .object({
-    unit_id: z.string().uuid("Sélectionnez une unité"),
+    unit_id: z.string().uuid("Sélectionnez un local"),
     tenant_id: z.string().uuid("Sélectionnez un locataire"),
     start_date: isoDate,
     end_date: optionalIsoDate,
