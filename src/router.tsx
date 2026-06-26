@@ -22,6 +22,7 @@ import { LeaseDetailPage } from '@/pages/lease-detail-page'
 import { RentDuesPage } from '@/pages/rent-dues-page'
 import { ExpensesPage } from '@/pages/expenses-page'
 import { SettingsPage } from '@/pages/settings-page'
+import { NotFoundPage } from '@/pages/not-found-page'
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -30,6 +31,7 @@ const rootRoute = createRootRoute({
       {import.meta.env.DEV && <TanStackRouterDevtools position="bottom-right" />}
     </>
   ),
+  notFoundComponent: NotFoundPage,
 })
 
 const loginRoute = createRoute({
