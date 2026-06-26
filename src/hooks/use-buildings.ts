@@ -12,6 +12,25 @@ export type BuildingRow = Building & {
 
 const buildingsKey = ['buildings'] as const
 
+/**
+ * Full non-paginated buildings list. Used for FK pickers / faceted filters
+ * (e.g. building facet on the rent dues list). For the buildings page,
+ * use `useBuildingsList`.
+ */
+export function useBuildings() {
+  return useQuery({
+    queryKey: [...buildingsKey, 'all'],
+    queryFn: async (): Promise<Building[]> => {
+      const { data, error } = await supabase
+        .from('buildings')
+        .select('*')
+        .order('name', { ascending: true })
+      if (error) throw error
+      return data ?? []
+    },
+  })
+}
+
 type BuildingsListParams = {
   state: DataTableState
   /** Optional pre-set filters merged into the state's column filters (e.g. owner_id from URL). */
