@@ -18,6 +18,7 @@ import {
   type FacetOption,
 } from '@/components/shared/data-table'
 import { ConfirmDeleteDialog } from '@/components/shared/confirm-delete-dialog'
+import { UnitDetailSheet } from '@/components/units/unit-detail-sheet'
 import { UnitFormDialog } from '@/components/units/unit-form-dialog'
 import { UnitStatusBadge } from '@/components/units/unit-status-badge'
 import {
@@ -52,6 +53,7 @@ export function UnitsList({ buildingId }: UnitsListProps) {
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<Unit | null>(null)
   const [deleting, setDeleting] = useState<Unit | null>(null)
+  const [detailId, setDetailId] = useState<string | null>(null)
 
   const stateForQuery = useMemo(
     () => ({ ...state, globalFilter: search }),
@@ -158,26 +160,28 @@ export function UnitsList({ buildingId }: UnitsListProps) {
         header: () => null,
         enableSorting: false,
         cell: ({ row }) => (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="size-8">
-                <MoreHorizontal className="size-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onSelect={() => openEdit(row.original)}>
-                <Pencil className="mr-2 size-4" />
-                Modifier
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onSelect={() => setDeleting(row.original)}
-                className="text-destructive focus:text-destructive"
-              >
-                <Trash2 className="mr-2 size-4" />
-                Supprimer
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div onClick={(e) => e.stopPropagation()}>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="size-8">
+                  <MoreHorizontal className="size-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onSelect={() => openEdit(row.original)}>
+                  <Pencil className="mr-2 size-4" />
+                  Modifier
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={() => setDeleting(row.original)}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <Trash2 className="mr-2 size-4" />
+                  Supprimer
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         ),
       },
     ],
@@ -194,6 +198,7 @@ export function UnitsList({ buildingId }: UnitsListProps) {
         total={data?.total ?? 0}
         isLoading={isLoading}
         isError={isError}
+        onRowClick={(row) => setDetailId(row.id)}
         emptyMessage={
           hasActiveFilters
             ? 'Aucune unité ne correspond aux filtres.'
@@ -243,6 +248,18 @@ export function UnitsList({ buildingId }: UnitsListProps) {
         }
       />
 
+      <UnitDetailSheet
+        unitId={detailId}
+        onOpenChange={(open) => !open && setDetailId(null)}
+        onEdit={(unit) => {
+          setDetailId(null)
+          openEdit(unit)
+        }}
+        onDelete={(unit) => {
+          setDetailId(null)
+          setDeleting(unit)
+        }}
+      />
       <UnitFormDialog
         open={formOpen}
         onOpenChange={setFormOpen}

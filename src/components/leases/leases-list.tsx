@@ -45,6 +45,8 @@ type LeasesListProps = {
   buildingId?: string
   /** Scope rows to a tenant. */
   tenantId?: string
+  /** Scope rows to a single unit. */
+  unitId?: string
   /** Hide the Unité column when redundant (e.g. inside a building detail). */
   hideUnitColumn?: boolean
   /** Hide the Locataire column when redundant (e.g. inside a tenant detail). */
@@ -54,6 +56,7 @@ type LeasesListProps = {
 export function LeasesList({
   buildingId,
   tenantId,
+  unitId,
   hideUnitColumn = false,
   hideTenantColumn = false,
 }: LeasesListProps) {
@@ -78,6 +81,7 @@ export function LeasesList({
     startTo: startRange.to,
     buildingId,
     tenantId,
+    unitId,
   })
   const deleteLease = useDeleteLease()
   const { data: settings } = useSettings()

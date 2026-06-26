@@ -39,11 +39,20 @@ type LeasesListParams = {
   buildingId?: string
   /** Scope to leases belonging to this tenant. */
   tenantId?: string
+  /** Scope to leases on a single unit. */
+  unitId?: string
 }
 
 export function useLeasesList(params: LeasesListParams) {
-  const { state, statusFilter, startFrom, startTo, buildingId, tenantId } =
-    params
+  const {
+    state,
+    statusFilter,
+    startFrom,
+    startTo,
+    buildingId,
+    tenantId,
+    unitId,
+  } = params
 
   return useQuery({
     queryKey: [
@@ -58,6 +67,7 @@ export function useLeasesList(params: LeasesListParams) {
         startTo: startTo ?? null,
         buildingId: buildingId ?? null,
         tenantId: tenantId ?? null,
+        unitId: unitId ?? null,
       },
     ],
     queryFn: async (): Promise<{ rows: LeaseRow[]; total: number }> => {
@@ -73,6 +83,9 @@ export function useLeasesList(params: LeasesListParams) {
       }
       if (tenantId) {
         query = query.eq('tenant_id', tenantId)
+      }
+      if (unitId) {
+        query = query.eq('unit_id', unitId)
       }
       if (statusFilter && statusFilter.length > 0) {
         query = query.in('status', statusFilter)
