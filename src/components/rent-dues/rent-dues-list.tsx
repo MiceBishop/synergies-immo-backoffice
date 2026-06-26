@@ -205,7 +205,14 @@ export function RentDuesList({
           if (!u) return '—'
           return (
             <span>
-              <span className="font-medium">{u.reference}</span>
+              <Link
+                to="/units/$id"
+                params={{ id: u.id }}
+                onClick={(e) => e.stopPropagation()}
+                className="font-medium hover:underline"
+              >
+                {u.reference}
+              </Link>
               {u.building && (
                 <>
                   {' — '}

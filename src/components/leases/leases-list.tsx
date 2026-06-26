@@ -137,7 +137,14 @@ export function LeasesList({
           if (!unit) return '—'
           return (
             <span>
-              <span className="font-medium">{unit.reference}</span>
+              <Link
+                to="/units/$id"
+                params={{ id: unit.id }}
+                onClick={(e) => e.stopPropagation()}
+                className="font-medium hover:underline"
+              >
+                {unit.reference}
+              </Link>
               {unit.building && (
                 <>
                   {' — '}

@@ -130,7 +130,13 @@ export function LeaseDetailPage() {
           <p className="text-muted-foreground">
             {lease.unit ? (
               <>
-                <span className="font-medium">{lease.unit.reference}</span>
+                <Link
+                  to="/units/$id"
+                  params={{ id: lease.unit.id }}
+                  className="font-medium hover:underline"
+                >
+                  {lease.unit.reference}
+                </Link>
                 {lease.unit.building && (
                   <>
                     {' — '}
