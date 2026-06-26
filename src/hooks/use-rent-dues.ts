@@ -28,11 +28,19 @@ const rentDuesKey = ['rent_dues'] as const
 const RENT_DUE_SELECT =
   'id, lease_id, due_month, amount_excl_tax, vat_amount, amount_incl_tax, status, created_at, lease:leases(id, rent_excl_tax, vat_rate, rent_incl_tax, tenant:tenants(id, first_name, last_name, tenant_type), unit:units(id, reference, building:buildings(id, name)))'
 
-// When scoping by building or tenant we need an inner join on leases so
-// PostgREST can apply the embedded-resource filters.
-const RENT_DUE_SELECT_SCOPED = RENT_DUE_SELECT.replace(
+// When scoping by tenant we need an inner join on leases so PostgREST applies
+// the embedded-resource filter to the parent rent_dues rows.
+const RENT_DUE_SELECT_TENANT_SCOPED = RENT_DUE_SELECT.replace(
   'lease:leases(',
   'lease:leases!inner('
+)
+
+// When scoping by building we additionally need an inner join on units —
+// without it the `lease.unit.building_id` filter only nulls-out the embedded
+// unit instead of excluding the parent rent_due row.
+const RENT_DUE_SELECT_BUILDING_SCOPED = RENT_DUE_SELECT_TENANT_SCOPED.replace(
+  'unit:units(',
+  'unit:units!inner('
 )
 
 type RentDuesListParams = {
@@ -63,9 +71,8 @@ export function useRentDuesList(params: RentDuesListParams) {
     tenantIds,
   } = params
 
-  const hasBuildingOrTenantScope =
-    (buildingIds && buildingIds.length > 0) ||
-    (tenantIds && tenantIds.length > 0)
+  const hasBuildingScope = Boolean(buildingIds && buildingIds.length > 0)
+  const hasTenantScope = Boolean(tenantIds && tenantIds.length > 0)
 
   return useQuery({
     queryKey: [
@@ -84,9 +91,11 @@ export function useRentDuesList(params: RentDuesListParams) {
       },
     ],
     queryFn: async (): Promise<{ rows: RentDueRow[]; total: number }> => {
-      const select = hasBuildingOrTenantScope
-        ? RENT_DUE_SELECT_SCOPED
-        : RENT_DUE_SELECT
+      const select = hasBuildingScope
+        ? RENT_DUE_SELECT_BUILDING_SCOPED
+        : hasTenantScope
+          ? RENT_DUE_SELECT_TENANT_SCOPED
+          : RENT_DUE_SELECT
       let query = supabase
         .from('rent_dues')
         .select(select, { count: 'exact' })

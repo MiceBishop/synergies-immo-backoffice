@@ -6,12 +6,17 @@ import { Button } from '@/components/ui/button'
 import {
   DataTable,
   DataTableColumnHeader,
-  DataTableDateRangeFilter,
   DataTableFacetedFilter,
   useDataTableState,
-  type DateRangeValue,
   type FacetOption,
 } from '@/components/shared/data-table'
+import {
+  MonthYearFilter,
+  monthYearToRange,
+  isMonthYearActive,
+  EMPTY_MONTH_YEAR,
+  type MonthYearValue,
+} from '@/components/shared/month-year-filter'
 import { GenerateRentDuesDialog } from '@/components/rent-dues/generate-rent-dues-dialog'
 import { RentDueDetailSheet } from '@/components/rent-dues/rent-due-detail-sheet'
 import { RentDueStatusBadge } from '@/components/rent-dues/rent-due-status-badge'
@@ -31,6 +36,8 @@ const statusOptions: FacetOption[] = enumOptions(paymentStatusLabels)
 type RentDuesListProps = {
   /** Scope rows to a single lease — used by the lease detail page. */
   leaseId?: string
+  /** Scope rows to a single building — used by the building detail page. */
+  buildingId?: string
   /** Hide the Locataire column when redundant (e.g. inside a tenant detail). */
   hideTenantColumn?: boolean
   /** Hide the Local column when redundant (e.g. inside a unit / lease detail). */
@@ -41,11 +48,12 @@ type RentDuesListProps = {
 
 export function RentDuesList({
   leaseId,
+  buildingId,
   hideTenantColumn = false,
   hideUnitColumn = false,
   hideGenerateButton = false,
 }: RentDuesListProps) {
-  const scoped = Boolean(leaseId)
+  const scoped = Boolean(leaseId) || Boolean(buildingId)
 
   const [state, setState] = useDataTableState()
   const [statusFilter, setStatusFilter] = useState<Enums<'payment_status'>[]>(
@@ -53,13 +61,12 @@ export function RentDuesList({
   )
   const [buildingFilter, setBuildingFilter] = useState<string[]>([])
   const [tenantFilter, setTenantFilter] = useState<string[]>([])
-  const [monthRange, setMonthRange] = useState<DateRangeValue>({
-    from: null,
-    to: null,
-  })
+  const [monthYear, setMonthYear] = useState<MonthYearValue>(EMPTY_MONTH_YEAR)
 
   const [generateOpen, setGenerateOpen] = useState(false)
   const [detailId, setDetailId] = useState<string | null>(null)
+
+  const monthRange = monthYearToRange(monthYear)
 
   const { data, isLoading, isError } = useRentDuesList({
     page: state.page,
@@ -69,7 +76,11 @@ export function RentDuesList({
     monthFrom: monthRange.from,
     monthTo: monthRange.to,
     leaseId,
-    buildingIds: scoped ? undefined : buildingFilter,
+    buildingIds: buildingId
+      ? [buildingId]
+      : scoped
+        ? undefined
+        : buildingFilter,
     tenantIds: scoped ? undefined : tenantFilter,
   })
   const { data: buildings } = useBuildings()
@@ -101,7 +112,7 @@ export function RentDuesList({
     statusFilter.length > 0 ||
     (!scoped && buildingFilter.length > 0) ||
     (!scoped && tenantFilter.length > 0) ||
-    Boolean(monthRange.from || monthRange.to)
+    isMonthYearActive(monthYear)
 
   const resetFilters = () => {
     setStatusFilter([])
@@ -109,7 +120,7 @@ export function RentDuesList({
       setBuildingFilter([])
       setTenantFilter([])
     }
-    setMonthRange({ from: null, to: null })
+    setMonthYear(EMPTY_MONTH_YEAR)
     setState({ page: 1 })
   }
 
@@ -254,11 +265,7 @@ export function RentDuesList({
                 onChange={setTenantFilter}
               />
             )}
-            <DataTableDateRangeFilter
-              title="Mois entre"
-              value={monthRange}
-              onChange={setMonthRange}
-            />
+            <MonthYearFilter value={monthYear} onChange={setMonthYear} />
             {hasActiveFilters && (
               <Button
                 variant="ghost"
