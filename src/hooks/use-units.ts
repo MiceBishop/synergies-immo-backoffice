@@ -6,7 +6,29 @@ import type { DataTableState } from '@/components/shared/data-table'
 
 export type Unit = Tables<'units'>
 
+export type UnitWithBuilding = Unit & {
+  building: Pick<Tables<'buildings'>, 'id' | 'name'> | null
+}
+
 const unitsKey = ['units'] as const
+
+/**
+ * Full non-paginated list of units, joined with their building. Used by FK
+ * pickers (lease form). For the per-building list, use `useUnitsList`.
+ */
+export function useUnitsWithBuilding() {
+  return useQuery({
+    queryKey: [...unitsKey, 'all-with-building'],
+    queryFn: async (): Promise<UnitWithBuilding[]> => {
+      const { data, error } = await supabase
+        .from('units')
+        .select('*, building:buildings(id, name)')
+        .order('reference', { ascending: true })
+      if (error) throw error
+      return (data ?? []) as unknown as UnitWithBuilding[]
+    },
+  })
+}
 
 type UnitsListParams = {
   buildingId: string
