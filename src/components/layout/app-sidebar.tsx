@@ -64,7 +64,11 @@ export function AppSidebar() {
   return (
     <aside className="hidden lg:flex w-64 shrink-0 border-r bg-card flex-col">
       <div className="h-14 px-6 flex items-center border-b">
-        <span className="font-semibold tracking-tight">Synergies Immo</span>
+        <img
+          src="/logo.png"
+          alt="Synergies Afrique"
+          className="h-7 w-auto"
+        />
       </div>
       <div className="flex-1">
         <NavLinks />

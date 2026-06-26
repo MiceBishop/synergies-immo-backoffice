@@ -52,18 +52,23 @@ export function AppHeader() {
           </SheetTrigger>
           <SheetContent side="left" className="w-72 p-0 flex flex-col">
             <SheetHeader className="h-14 px-6 border-b flex flex-row items-center">
-              <SheetTitle className="text-base font-semibold tracking-tight">
-                Synergies Immo
-              </SheetTitle>
+              <SheetTitle className="sr-only">Synergies Afrique</SheetTitle>
+              <img
+                src="/logo.png"
+                alt="Synergies Afrique"
+                className="h-7 w-auto"
+              />
             </SheetHeader>
             <div className="flex-1 overflow-y-auto">
               <NavLinks onNavigate={() => setMobileNavOpen(false)} />
             </div>
           </SheetContent>
         </Sheet>
-        <span className="font-semibold tracking-tight lg:hidden">
-          Synergies Immo
-        </span>
+        <img
+          src="/logo.png"
+          alt="Synergies Afrique"
+          className="h-6 w-auto lg:hidden"
+        />
       </div>
 
       <DropdownMenu>
