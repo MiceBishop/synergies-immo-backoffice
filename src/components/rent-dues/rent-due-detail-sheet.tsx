@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
-import { ExternalLink, Plus, Trash2 } from 'lucide-react'
+import { Download, ExternalLink, Plus, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
@@ -51,6 +51,9 @@ export function RentDueDetailSheet({
 
   const [paymentOpen, setPaymentOpen] = useState(false)
   const [deletingPayment, setDeletingPayment] = useState<Payment | null>(null)
+  const [generatingPdf, setGeneratingPdf] = useState<
+    'invoice' | 'receipt' | null
+  >(null)
 
   const tenant = rentDue?.lease?.tenant
   const unit = rentDue?.lease?.unit
@@ -65,6 +68,56 @@ export function RentDueDetailSheet({
       ? tenant.last_name
       : [tenant.first_name, tenant.last_name].filter(Boolean).join(' ')
     : '—'
+
+  const handleDownloadPdf = async (kind: 'invoice' | 'receipt') => {
+    if (!rentDue) return
+    setGeneratingPdf(kind)
+    try {
+      // Lazy-load react-pdf (~1.5 MB raw) so the main bundle stays slim.
+      // The first click pays the network cost; subsequent clicks are instant.
+      const [
+        { buildPdfData },
+        { downloadAndArchivePdf },
+        { InvoiceDocument },
+        { ReceiptDocument },
+      ] = await Promise.all([
+        import('@/lib/pdf/data'),
+        import('@/lib/pdf/generate'),
+        import('@/lib/pdf/invoice-document'),
+        import('@/lib/pdf/receipt-document'),
+      ])
+
+      const periodLabel = formatMonthYear(rentDue.due_month)
+      const pdfData = buildPdfData({
+        rentDue,
+        payments: payments ?? [],
+        settings,
+        periodLabel,
+        issuedOn: formatDate(new Date(), 'd MMMM yyyy'),
+      })
+      const titleSlug = kind === 'invoice' ? 'Facture' : 'Quittance'
+      const filename = `${titleSlug} ${pdfData.documentNumber}.pdf`
+      const storagePath = `rent-dues/${rentDue.id}/${kind}.pdf`
+      const doc =
+        kind === 'invoice' ? (
+          <InvoiceDocument data={pdfData} settings={settings} />
+        ) : (
+          <ReceiptDocument data={pdfData} settings={settings} />
+        )
+      await downloadAndArchivePdf({ document: doc, filename, storagePath })
+      toast.success(
+        kind === 'invoice'
+          ? 'Facture téléchargée et archivée'
+          : 'Quittance téléchargée et archivée'
+      )
+    } catch (error) {
+      toast.error('Échec de la génération PDF', {
+        description: error instanceof Error ? error.message : undefined,
+      })
+    } finally {
+      setGeneratingPdf(null)
+    }
+  }
 
   const confirmDeletePayment = async () => {
     if (!deletingPayment) return
@@ -148,15 +201,41 @@ export function RentDueDetailSheet({
                   </span>
                 )}
               </SheetDescription>
-              {effectiveRentDueStatus(rentDue.status, rentDue.due_month) !==
-                'paid' && (
-                <div className="pt-2">
-                  <Button size="sm" onClick={() => setPaymentOpen(true)}>
-                    <Plus className="size-4" />
-                    Enregistrer un paiement
+              <div className="pt-2 flex flex-wrap gap-2">
+                {effectiveRentDueStatus(rentDue.status, rentDue.due_month) !==
+                  'paid' && (
+                  <>
+                    <Button size="sm" onClick={() => setPaymentOpen(true)}>
+                      <Plus className="size-4" />
+                      Enregistrer un paiement
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleDownloadPdf('invoice')}
+                      disabled={generatingPdf !== null}
+                    >
+                      <Download className="size-4" />
+                      {generatingPdf === 'invoice'
+                        ? 'Génération…'
+                        : 'Télécharger la facture'}
+                    </Button>
+                  </>
+                )}
+                {effectiveRentDueStatus(rentDue.status, rentDue.due_month) ===
+                  'paid' && (
+                  <Button
+                    size="sm"
+                    onClick={() => handleDownloadPdf('receipt')}
+                    disabled={generatingPdf !== null}
+                  >
+                    <Download className="size-4" />
+                    {generatingPdf === 'receipt'
+                      ? 'Génération…'
+                      : 'Télécharger la quittance'}
                   </Button>
-                </div>
-              )}
+                )}
+              </div>
             </>
           )}
         </SheetHeader>
