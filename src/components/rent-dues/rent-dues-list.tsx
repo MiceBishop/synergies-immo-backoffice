@@ -89,10 +89,10 @@ export function RentDuesList({
   // list is scoped to a single lease, we leave the time filter empty so the
   // user sees every quittance for that lease without surprise.
   const [monthFilter, setMonthFilter] = useState<string[]>(() =>
-    Boolean(leaseId) ? [] : defaultMonths()
+    leaseId ? [] : defaultMonths()
   )
   const [yearFilter, setYearFilter] = useState<string[]>(() =>
-    Boolean(leaseId) ? [] : defaultYears()
+    leaseId ? [] : defaultYears()
   )
 
   const yearOptions = useMemo(() => buildYearOptions(), [])

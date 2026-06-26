@@ -19,6 +19,7 @@ import { TenantDetailPage } from '@/pages/tenant-detail-page'
 import { LeasesPage } from '@/pages/leases-page'
 import { LeaseDetailPage } from '@/pages/lease-detail-page'
 import { RentDuesPage } from '@/pages/rent-dues-page'
+import { ExpensesPage } from '@/pages/expenses-page'
 import { SettingsPage } from '@/pages/settings-page'
 
 const rootRoute = createRootRoute({
@@ -116,6 +117,12 @@ const rentDuesRoute = createRoute({
   component: RentDuesPage,
 })
 
+const expensesRoute = createRoute({
+  getParentRoute: () => appLayoutRoute,
+  path: '/expenses',
+  component: ExpensesPage,
+})
+
 const settingsRoute = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: '/settings',
@@ -135,6 +142,7 @@ const routeTree = rootRoute.addChildren([
     leasesRoute,
     leaseDetailRoute,
     rentDuesRoute,
+    expensesRoute,
     settingsRoute,
   ]),
 ])
