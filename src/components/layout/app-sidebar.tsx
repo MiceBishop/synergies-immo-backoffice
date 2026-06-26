@@ -23,7 +23,7 @@ export const navItems: NavItem[] = [
   { to: '/buildings', label: 'Immeubles', icon: Building2 },
   { to: '/tenants', label: 'Locataires', icon: Users },
   { to: '/leases', label: 'Contrats', icon: FileText },
-  { to: '/payments', label: 'Paiements', icon: CreditCard },
+  { to: '/rent-dues', label: 'Loyers', icon: CreditCard },
   { to: '/expenses', label: 'Dépenses', icon: Receipt },
   { to: '/settings', label: 'Paramètres', icon: Settings },
 ]
