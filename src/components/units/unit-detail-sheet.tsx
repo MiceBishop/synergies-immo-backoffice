@@ -9,6 +9,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
+import { ExpensesList } from '@/components/expenses/expenses-list'
 import { LeasesList } from '@/components/leases/leases-list'
 import { UnitStatusBadge } from '@/components/units/unit-status-badge'
 import { useUnit, type Unit } from '@/hooks/use-units'
@@ -140,6 +141,16 @@ export function UnitDetailSheet({
                 </p>
               </div>
               <LeasesList unitId={unit.id} hideUnitColumn />
+            </section>
+
+            <section className="space-y-3">
+              <div>
+                <h3 className="text-sm font-medium">Dépenses</h3>
+                <p className="text-xs text-muted-foreground">
+                  Factures et charges propres à ce local.
+                </p>
+              </div>
+              <ExpensesList unitId={unit.id} hideTargetColumn />
             </section>
           </div>
         )}

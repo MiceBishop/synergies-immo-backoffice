@@ -13,6 +13,7 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { ConfirmDeleteDialog } from '@/components/shared/confirm-delete-dialog'
 import { BuildingFormDialog } from '@/components/buildings/building-form-dialog'
+import { ExpensesList } from '@/components/expenses/expenses-list'
 import { LeasesList } from '@/components/leases/leases-list'
 import { RentDuesList } from '@/components/rent-dues/rent-dues-list'
 import { UnitsList } from '@/components/units/units-list'
@@ -184,6 +185,17 @@ export function BuildingDetailPage() {
           </CardDescription>
         </div>
         <RentDuesList buildingId={building.id} hideGenerateButton />
+      </div>
+
+      <div className="space-y-3">
+        <div>
+          <h2 className="text-xl font-semibold tracking-tight">Dépenses</h2>
+          <CardDescription>
+            Factures et charges directement liées à cet immeuble. Les dépenses
+            sur les locaux apparaissent sur le détail du local.
+          </CardDescription>
+        </div>
+        <ExpensesList buildingId={building.id} hideTargetColumn />
       </div>
 
       <BuildingFormDialog
