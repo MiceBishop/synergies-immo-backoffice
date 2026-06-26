@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
@@ -19,6 +20,7 @@ import { Separator } from '@/components/ui/separator'
 import { ConfirmDeleteDialog } from '@/components/shared/confirm-delete-dialog'
 import { LeaseFormDialog } from '@/components/leases/lease-form-dialog'
 import { LeaseStatusBadge } from '@/components/leases/lease-status-badge'
+import { RentDuesList } from '@/components/rent-dues/rent-dues-list'
 import {
   useLease,
   useDeleteLease,
@@ -238,17 +240,20 @@ export function LeaseDetailPage() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Quittances</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            Les quittances mensuelles et les paiements seront disponibles ici à
-            partir de la Phase 3 (moteur financier).
-          </p>
-        </CardContent>
-      </Card>
+      <div className="space-y-3">
+        <div>
+          <h2 className="text-xl font-semibold tracking-tight">Quittances</h2>
+          <CardDescription>
+            Loyers mensuels générés pour ce contrat et statut de paiement.
+          </CardDescription>
+        </div>
+        <RentDuesList
+          leaseId={lease.id}
+          hideTenantColumn
+          hideUnitColumn
+          hideGenerateButton
+        />
+      </div>
 
       <LeaseFormDialog
         open={editOpen}

@@ -14,6 +14,7 @@ import { Separator } from '@/components/ui/separator'
 import { ConfirmDeleteDialog } from '@/components/shared/confirm-delete-dialog'
 import { BuildingFormDialog } from '@/components/buildings/building-form-dialog'
 import { LeasesList } from '@/components/leases/leases-list'
+import { RentDuesList } from '@/components/rent-dues/rent-dues-list'
 import { UnitsList } from '@/components/units/units-list'
 import { useBuilding, useDeleteBuilding } from '@/hooks/use-buildings'
 import { formatDate } from '@/lib/format'
@@ -173,6 +174,16 @@ export function BuildingDetailPage() {
           </CardDescription>
         </div>
         <LeasesList buildingId={building.id} />
+      </div>
+
+      <div className="space-y-3">
+        <div>
+          <h2 className="text-xl font-semibold tracking-tight">Quittances</h2>
+          <CardDescription>
+            Loyers mensuels générés pour les contrats de cet immeuble.
+          </CardDescription>
+        </div>
+        <RentDuesList buildingId={building.id} hideGenerateButton />
       </div>
 
       <BuildingFormDialog
