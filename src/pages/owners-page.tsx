@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { MoreHorizontal, Pencil, Plus, Search, Trash2, X } from 'lucide-react'
 import { toast } from 'sonner'
 import type { ColumnDef } from '@tanstack/react-table'
@@ -27,6 +28,7 @@ import {
 import { formatDate } from '@/lib/format'
 
 export function OwnersPage() {
+  const navigate = useNavigate()
   const [state, setState] = useDataTableState({
     sorting: [{ id: 'last_name', desc: false }],
   })
@@ -91,7 +93,14 @@ export function OwnersPage() {
           <DataTableColumnHeader column={column} title="Nom" />
         ),
         cell: ({ row }) => (
-          <span className="font-medium">{fullName(row.original)}</span>
+          <Link
+            to="/owners/$id"
+            params={{ id: row.original.id }}
+            onClick={(e) => e.stopPropagation()}
+            className="font-medium hover:underline"
+          >
+            {fullName(row.original)}
+          </Link>
         ),
       },
       {
@@ -125,26 +134,28 @@ export function OwnersPage() {
         header: () => null,
         enableSorting: false,
         cell: ({ row }) => (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="size-8">
-                <MoreHorizontal className="size-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onSelect={() => openEdit(row.original)}>
-                <Pencil className="mr-2 size-4" />
-                Modifier
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onSelect={() => setDeleting(row.original)}
-                className="text-destructive focus:text-destructive"
-              >
-                <Trash2 className="mr-2 size-4" />
-                Supprimer
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div onClick={(e) => e.stopPropagation()}>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="size-8">
+                  <MoreHorizontal className="size-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onSelect={() => openEdit(row.original)}>
+                  <Pencil className="mr-2 size-4" />
+                  Modifier
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={() => setDeleting(row.original)}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <Trash2 className="mr-2 size-4" />
+                  Supprimer
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         ),
       },
     ],
@@ -170,6 +181,9 @@ export function OwnersPage() {
         total={data?.total ?? 0}
         isLoading={isLoading}
         isError={isError}
+        onRowClick={(row) =>
+          navigate({ to: '/owners/$id', params: { id: row.id } })
+        }
         emptyMessage={
           hasActiveFilters
             ? 'Aucun propriétaire ne correspond aux filtres.'

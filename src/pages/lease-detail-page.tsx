@@ -110,12 +110,43 @@ export function LeaseDetailPage() {
         <div className="space-y-1">
           <div className="flex items-center gap-3 flex-wrap">
             <h1 className="text-2xl font-semibold tracking-tight">
-              Bail — {tenantName}
+              Bail —{' '}
+              {lease.tenant ? (
+                <Link
+                  to="/tenants/$id"
+                  params={{ id: lease.tenant.id }}
+                  className="hover:underline"
+                >
+                  {tenantName}
+                </Link>
+              ) : (
+                tenantName
+              )}
             </h1>
             <LeaseStatusBadge status={lease.status} />
           </div>
           <p className="text-muted-foreground">
-            {unitLabel} · {formatDate(lease.start_date)}
+            {lease.unit ? (
+              <>
+                <span className="font-medium">{lease.unit.reference}</span>
+                {lease.unit.building && (
+                  <>
+                    {' — '}
+                    <Link
+                      to="/buildings/$id"
+                      params={{ id: lease.unit.building.id }}
+                      className="hover:underline"
+                    >
+                      {lease.unit.building.name}
+                    </Link>
+                  </>
+                )}
+              </>
+            ) : (
+              unitLabel
+            )}
+            {' · '}
+            {formatDate(lease.start_date)}
             {lease.end_date ? ` → ${formatDate(lease.end_date)}` : ' (sans fin)'}
           </p>
         </div>

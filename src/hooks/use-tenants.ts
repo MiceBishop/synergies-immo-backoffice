@@ -96,6 +96,22 @@ export function useTenantsList(params: TenantsListParams) {
   })
 }
 
+export function useTenant(id: string | null | undefined) {
+  return useQuery({
+    enabled: Boolean(id),
+    queryKey: [...tenantsKey, 'one', id],
+    queryFn: async (): Promise<Tenant> => {
+      const { data, error } = await supabase
+        .from('tenants')
+        .select('*')
+        .eq('id', id!)
+        .single()
+      if (error) throw error
+      return data
+    },
+  })
+}
+
 export function useCreateTenant() {
   const queryClient = useQueryClient()
   return useMutation({
