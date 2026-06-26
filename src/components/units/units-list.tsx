@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { MoreHorizontal, Pencil, Plus, Search, Trash2, X } from 'lucide-react'
 import { toast } from 'sonner'
 import type { ColumnDef } from '@tanstack/react-table'
@@ -18,7 +19,6 @@ import {
   type FacetOption,
 } from '@/components/shared/data-table'
 import { ConfirmDeleteDialog } from '@/components/shared/confirm-delete-dialog'
-import { UnitDetailSheet } from '@/components/units/unit-detail-sheet'
 import { UnitFormDialog } from '@/components/units/unit-form-dialog'
 import { UnitStatusBadge } from '@/components/units/unit-status-badge'
 import {
@@ -43,6 +43,7 @@ const typeOptions: FacetOption[] = enumOptions(unitTypeLabels)
 const statusOptions: FacetOption[] = enumOptions(unitStatusLabels)
 
 export function UnitsList({ buildingId }: UnitsListProps) {
+  const navigate = useNavigate()
   const [state, setState] = useDataTableState({
     sorting: [{ id: 'reference', desc: false }],
   })
@@ -53,7 +54,6 @@ export function UnitsList({ buildingId }: UnitsListProps) {
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<Unit | null>(null)
   const [deleting, setDeleting] = useState<Unit | null>(null)
-  const [detailId, setDetailId] = useState<string | null>(null)
 
   const stateForQuery = useMemo(
     () => ({ ...state, globalFilter: search }),
@@ -109,7 +109,14 @@ export function UnitsList({ buildingId }: UnitsListProps) {
           <DataTableColumnHeader column={column} title="Référence" />
         ),
         cell: ({ row }) => (
-          <span className="font-medium">{row.original.reference}</span>
+          <Link
+            to="/units/$id"
+            params={{ id: row.original.id }}
+            onClick={(e) => e.stopPropagation()}
+            className="font-medium hover:underline"
+          >
+            {row.original.reference}
+          </Link>
         ),
       },
       {
@@ -198,7 +205,9 @@ export function UnitsList({ buildingId }: UnitsListProps) {
         total={data?.total ?? 0}
         isLoading={isLoading}
         isError={isError}
-        onRowClick={(row) => setDetailId(row.id)}
+        onRowClick={(row) =>
+          navigate({ to: '/units/$id', params: { id: row.id } })
+        }
         emptyMessage={
           hasActiveFilters
             ? 'Aucun local ne correspond aux filtres.'
@@ -248,18 +257,6 @@ export function UnitsList({ buildingId }: UnitsListProps) {
         }
       />
 
-      <UnitDetailSheet
-        unitId={detailId}
-        onOpenChange={(open) => !open && setDetailId(null)}
-        onEdit={(unit) => {
-          setDetailId(null)
-          openEdit(unit)
-        }}
-        onDelete={(unit) => {
-          setDetailId(null)
-          setDeleting(unit)
-        }}
-      />
       <UnitFormDialog
         open={formOpen}
         onOpenChange={setFormOpen}

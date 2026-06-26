@@ -181,7 +181,14 @@ export function ExpensesList({
           if (e.unit) {
             return (
               <span>
-                <span className="font-medium">{e.unit.reference}</span>
+                <Link
+                  to="/units/$id"
+                  params={{ id: e.unit.id }}
+                  onClick={(ev) => ev.stopPropagation()}
+                  className="font-medium hover:underline"
+                >
+                  {e.unit.reference}
+                </Link>
                 {e.unit.building && (
                   <>
                     {' — '}

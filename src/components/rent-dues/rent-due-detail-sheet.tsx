@@ -125,7 +125,14 @@ export function RentDueDetailSheet({
                 )}
                 {unit && (
                   <span className="block">
-                    Local : <span className="font-medium">{unit.reference}</span>
+                    Local :{' '}
+                    <Link
+                      to="/units/$id"
+                      params={{ id: unit.id }}
+                      className="font-medium hover:underline"
+                    >
+                      {unit.reference}
+                    </Link>
                     {unit.building && (
                       <>
                         {' — '}
