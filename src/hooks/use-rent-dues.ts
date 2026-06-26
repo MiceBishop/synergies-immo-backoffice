@@ -48,8 +48,10 @@ type RentDuesListParams = {
   pageSize: number
   sorting: { id: string; desc: boolean }[]
   statusFilter?: Enums<'payment_status'>[]
-  monthFrom?: string | null
-  monthTo?: string | null
+  /** Multi-select month (1-12). Combined with `years` per the truth table. */
+  months?: number[]
+  /** Multi-select year. Combined with `months` per the truth table. */
+  years?: number[]
   /** Scope to rent dues belonging to a single lease. */
   leaseId?: string
   /** Scope to rent dues whose lease.unit.building_id matches. */
@@ -58,14 +60,61 @@ type RentDuesListParams = {
   tenantIds?: string[]
 }
 
+/**
+ * Builds the SQL filter for the (months, years) tuple. `due_month` is always
+ * stored as YYYY-MM-01, so each filter style takes advantage of that.
+ */
+function applyMonthYearFilter<T>(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  query: any,
+  months: number[],
+  years: number[]
+): T {
+  const hasMonths = months.length > 0
+  const hasYears = years.length > 0
+  if (!hasMonths && !hasYears) return query
+
+  const mm = (m: number) => String(m).padStart(2, '0')
+
+  if (hasMonths && hasYears) {
+    // Explicit cartesian product of YYYY-MM-01 strings.
+    const values: string[] = []
+    for (const y of years) {
+      for (const m of months) {
+        values.push(`${y}-${mm(m)}-01`)
+      }
+    }
+    return query.in('due_month', values)
+  }
+
+  if (hasYears) {
+    // Years only — one .gte/.lte if single year, else explicit IN of every
+    // month within each selected year.
+    if (years.length === 1) {
+      const y = years[0]
+      return query.gte('due_month', `${y}-01-01`).lte('due_month', `${y}-12-01`)
+    }
+    const values: string[] = []
+    for (const y of years) {
+      for (let m = 1; m <= 12; m++) values.push(`${y}-${mm(m)}-01`)
+    }
+    return query.in('due_month', values)
+  }
+
+  // Months only across all years — pattern match via PostgREST `like`.
+  // `_` matches a single character, so `____-MM-01` matches any 4-digit year.
+  const patterns = months.map((m) => `due_month.like.____-${mm(m)}-01`)
+  return query.or(patterns.join(','))
+}
+
 export function useRentDuesList(params: RentDuesListParams) {
   const {
     page,
     pageSize,
     sorting,
     statusFilter,
-    monthFrom,
-    monthTo,
+    months,
+    years,
     leaseId,
     buildingIds,
     tenantIds,
@@ -83,8 +132,8 @@ export function useRentDuesList(params: RentDuesListParams) {
         pageSize,
         sorting,
         statusFilter: statusFilter ?? [],
-        monthFrom: monthFrom ?? null,
-        monthTo: monthTo ?? null,
+        months: months ?? [],
+        years: years ?? [],
         leaseId: leaseId ?? null,
         buildingIds: buildingIds ?? [],
         tenantIds: tenantIds ?? [],
@@ -122,8 +171,8 @@ export function useRentDuesList(params: RentDuesListParams) {
           query = query.in('status', unique)
         }
       }
-      if (monthFrom) query = query.gte('due_month', monthFrom)
-      if (monthTo) query = query.lte('due_month', monthTo)
+
+      query = applyMonthYearFilter(query, months ?? [], years ?? [])
 
       if (sorting.length === 0) {
         query = query

@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link } from '@tanstack/react-router'
+import { format } from 'date-fns'
+import { fr } from 'date-fns/locale'
 import { Plus, X } from 'lucide-react'
 import type { ColumnDef } from '@tanstack/react-table'
 import { Button } from '@/components/ui/button'
@@ -10,13 +12,6 @@ import {
   useDataTableState,
   type FacetOption,
 } from '@/components/shared/data-table'
-import {
-  MonthYearFilter,
-  monthYearToRange,
-  isMonthYearActive,
-  EMPTY_MONTH_YEAR,
-  type MonthYearValue,
-} from '@/components/shared/month-year-filter'
 import { GenerateRentDuesDialog } from '@/components/rent-dues/generate-rent-dues-dialog'
 import { RentDueDetailSheet } from '@/components/rent-dues/rent-due-detail-sheet'
 import { RentDueStatusBadge } from '@/components/rent-dues/rent-due-status-badge'
@@ -32,6 +27,35 @@ import { enumOptions, paymentStatusLabels } from '@/lib/enums'
 import type { Enums } from '@/lib/db'
 
 const statusOptions: FacetOption[] = enumOptions(paymentStatusLabels)
+
+const MONTH_OPTIONS: FacetOption[] = Array.from({ length: 12 }, (_, i) => {
+  const name = format(new Date(2000, i, 1), 'LLLL', { locale: fr })
+  return {
+    value: String(i + 1),
+    label: name.charAt(0).toUpperCase() + name.slice(1),
+  }
+})
+
+function buildYearOptions(): FacetOption[] {
+  const current = new Date().getFullYear()
+  return Array.from({ length: 11 }, (_, i) => {
+    const y = current - i
+    return { value: String(y), label: String(y) }
+  })
+}
+
+/** Last 3 months ending at the current month, clamped to the current year. */
+function defaultMonths(): string[] {
+  const m = new Date().getMonth() + 1 // 1-12
+  const start = Math.max(1, m - 2)
+  const result: string[] = []
+  for (let i = start; i <= m; i++) result.push(String(i))
+  return result
+}
+
+function defaultYears(): string[] {
+  return [String(new Date().getFullYear())]
+}
 
 type RentDuesListProps = {
   /** Scope rows to a single lease — used by the lease detail page. */
@@ -61,20 +85,28 @@ export function RentDuesList({
   )
   const [buildingFilter, setBuildingFilter] = useState<string[]>([])
   const [tenantFilter, setTenantFilter] = useState<string[]>([])
-  const [monthYear, setMonthYear] = useState<MonthYearValue>(EMPTY_MONTH_YEAR)
+  // Defaults: current year + last 3 months (clamped to current year). When the
+  // list is scoped to a single lease, we leave the time filter empty so the
+  // user sees every quittance for that lease without surprise.
+  const [monthFilter, setMonthFilter] = useState<string[]>(() =>
+    Boolean(leaseId) ? [] : defaultMonths()
+  )
+  const [yearFilter, setYearFilter] = useState<string[]>(() =>
+    Boolean(leaseId) ? [] : defaultYears()
+  )
+
+  const yearOptions = useMemo(() => buildYearOptions(), [])
 
   const [generateOpen, setGenerateOpen] = useState(false)
   const [detailId, setDetailId] = useState<string | null>(null)
-
-  const monthRange = monthYearToRange(monthYear)
 
   const { data, isLoading, isError } = useRentDuesList({
     page: state.page,
     pageSize: state.pageSize,
     sorting: state.sorting.map((s) => ({ id: s.id, desc: s.desc })),
     statusFilter,
-    monthFrom: monthRange.from,
-    monthTo: monthRange.to,
+    months: monthFilter.map(Number),
+    years: yearFilter.map(Number),
     leaseId,
     buildingIds: buildingId
       ? [buildingId]
@@ -112,7 +144,8 @@ export function RentDuesList({
     statusFilter.length > 0 ||
     (!scoped && buildingFilter.length > 0) ||
     (!scoped && tenantFilter.length > 0) ||
-    isMonthYearActive(monthYear)
+    monthFilter.length > 0 ||
+    yearFilter.length > 0
 
   const resetFilters = () => {
     setStatusFilter([])
@@ -120,7 +153,8 @@ export function RentDuesList({
       setBuildingFilter([])
       setTenantFilter([])
     }
-    setMonthYear(EMPTY_MONTH_YEAR)
+    setMonthFilter([])
+    setYearFilter([])
     setState({ page: 1 })
   }
 
@@ -265,7 +299,18 @@ export function RentDuesList({
                 onChange={setTenantFilter}
               />
             )}
-            <MonthYearFilter value={monthYear} onChange={setMonthYear} />
+            <DataTableFacetedFilter
+              title="Mois"
+              options={MONTH_OPTIONS}
+              selected={monthFilter}
+              onChange={setMonthFilter}
+            />
+            <DataTableFacetedFilter
+              title="Année"
+              options={yearOptions}
+              selected={yearFilter}
+              onChange={setYearFilter}
+            />
             {hasActiveFilters && (
               <Button
                 variant="ghost"
