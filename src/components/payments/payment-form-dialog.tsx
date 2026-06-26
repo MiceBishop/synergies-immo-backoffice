@@ -38,7 +38,7 @@ import {
 import { useCreatePayment } from '@/hooks/use-payments'
 import { useSettings } from '@/hooks/use-settings'
 import { paymentMethodLabels, enumOptions } from '@/lib/enums'
-import { formatAmount } from '@/lib/format'
+import { formatAmount, todayIso } from '@/lib/format'
 
 type PaymentFormDialogProps = {
   open: boolean
@@ -49,8 +49,6 @@ type PaymentFormDialogProps = {
 }
 
 const methodOptions = enumOptions(paymentMethodLabels)
-
-const today = () => new Date().toISOString().slice(0, 10)
 
 export function PaymentFormDialog({
   open,
@@ -65,7 +63,7 @@ export function PaymentFormDialog({
 
   const emptyValues = (): PaymentFormValues => ({
     amount: remaining > 0 ? remaining : amountDue,
-    payment_date: today(),
+    payment_date: todayIso(),
     method: 'bank_transfer',
     payment_reference: '',
     notes: '',
@@ -148,7 +146,7 @@ export function PaymentFormDialog({
                     <FormControl>
                       <DatePicker
                         value={field.value}
-                        onChange={(v) => field.onChange(v ?? today())}
+                        onChange={(v) => field.onChange(v ?? todayIso())}
                         clearable={false}
                       />
                     </FormControl>

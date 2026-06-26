@@ -32,32 +32,12 @@ import {
   type Payment,
 } from '@/hooks/use-payments'
 import { useSettings } from '@/hooks/use-settings'
-import { formatAmount, formatDate } from '@/lib/format'
+import { formatAmount, formatDate, formatMonthYear } from '@/lib/format'
 import { paymentMethodLabels } from '@/lib/enums'
 
 type RentDueDetailSheetProps = {
   rentDueId: string | null
   onOpenChange: (open: boolean) => void
-}
-
-function frenchMonth(iso: string | null): string {
-  if (!iso) return '—'
-  const [y, m] = iso.split('-').map(Number)
-  const months = [
-    'janvier',
-    'février',
-    'mars',
-    'avril',
-    'mai',
-    'juin',
-    'juillet',
-    'août',
-    'septembre',
-    'octobre',
-    'novembre',
-    'décembre',
-  ]
-  return `${months[m - 1]} ${y}`
 }
 
 export function RentDueDetailSheet({
@@ -121,8 +101,8 @@ export function RentDueDetailSheet({
           ) : (
             <>
               <div className="flex items-center gap-3 flex-wrap">
-                <SheetTitle className="text-xl">
-                  Loyer de {frenchMonth(rentDue.due_month)}
+                <SheetTitle className="text-xl capitalize">
+                  Loyer de {formatMonthYear(rentDue.due_month)}
                 </SheetTitle>
                 <RentDueStatusBadge
                   status={rentDue.status}

@@ -12,32 +12,23 @@ import {
 import { Label } from '@/components/ui/label'
 import { DatePicker } from '@/components/shared/date-picker'
 import { useGenerateRentDues } from '@/hooks/use-rent-dues'
+import { firstOfCurrentMonthIso, firstOfMonthIso } from '@/lib/format'
 
 type GenerateRentDuesDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
-function firstOfCurrentMonth(): string {
-  const today = new Date()
-  return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-01`
-}
-
-function firstOfMonth(iso: string): string {
-  // Snap any YYYY-MM-DD to the first day of its month.
-  return `${iso.slice(0, 7)}-01`
-}
-
 export function GenerateRentDuesDialog({
   open,
   onOpenChange,
 }: GenerateRentDuesDialogProps) {
-  const [month, setMonth] = useState<string>(firstOfCurrentMonth())
+  const [month, setMonth] = useState<string>(firstOfCurrentMonthIso())
   const generate = useGenerateRentDues()
 
   useEffect(() => {
     if (open) {
-      setMonth(firstOfCurrentMonth())
+      setMonth(firstOfCurrentMonthIso())
     }
   }, [open])
 
@@ -81,7 +72,9 @@ export function GenerateRentDuesDialog({
           <Label htmlFor="month">Mois à générer</Label>
           <DatePicker
             value={month}
-            onChange={(v) => setMonth(v ? firstOfMonth(v) : firstOfCurrentMonth())}
+            onChange={(v) =>
+              setMonth(v ? firstOfMonthIso(v) : firstOfCurrentMonthIso())
+            }
             clearable={false}
           />
           <p className="text-xs text-muted-foreground">

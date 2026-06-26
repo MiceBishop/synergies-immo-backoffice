@@ -20,31 +20,11 @@ import {
   type RentDueRow,
 } from '@/hooks/use-rent-dues'
 import { useSettings } from '@/hooks/use-settings'
-import { formatAmount } from '@/lib/format'
+import { formatAmount, formatMonthYear } from '@/lib/format'
 import { enumOptions, paymentStatusLabels } from '@/lib/enums'
 import type { Enums } from '@/lib/db'
 
 const statusOptions: FacetOption[] = enumOptions(paymentStatusLabels)
-
-function frenchMonth(iso: string | null): string {
-  if (!iso) return '—'
-  const [y, m] = iso.split('-').map(Number)
-  const months = [
-    'janvier',
-    'février',
-    'mars',
-    'avril',
-    'mai',
-    'juin',
-    'juillet',
-    'août',
-    'septembre',
-    'octobre',
-    'novembre',
-    'décembre',
-  ]
-  return `${months[m - 1]} ${y}`
-}
 
 export function RentDuesPage() {
   const [state, setState] = useDataTableState()
@@ -95,7 +75,7 @@ export function RentDuesPage() {
         ),
         cell: ({ row }) => (
           <span className="font-medium capitalize">
-            {frenchMonth(row.original.due_month)}
+            {formatMonthYear(row.original.due_month)}
           </span>
         ),
       },

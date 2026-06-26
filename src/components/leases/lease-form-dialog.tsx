@@ -51,7 +51,7 @@ import {
   leaseStatusLabels,
   unitTypeLabels,
 } from '@/lib/enums'
-import { formatAmount } from '@/lib/format'
+import { formatAmount, todayIso } from '@/lib/format'
 import type { Enums } from '@/lib/db'
 
 type LeaseFormDialogProps = {
@@ -60,12 +60,10 @@ type LeaseFormDialogProps = {
   lease?: LeaseRow | null
 }
 
-const today = () => new Date().toISOString().slice(0, 10)
-
 const emptyValues = (): LeaseFormValues => ({
   unit_id: '',
   tenant_id: '',
-  start_date: today(),
+  start_date: todayIso(),
   end_date: null,
   rent_excl_tax: 0,
   vat_rate: 0,

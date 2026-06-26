@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { paymentStatusLabels } from '@/lib/enums'
+import { firstOfCurrentMonthIso } from '@/lib/format'
 import type { Enums } from '@/lib/db'
 
 /**
@@ -26,10 +27,8 @@ export function effectiveRentDueStatus(
 ): EffectiveRentDueStatus {
   const value = status ?? 'unpaid'
   if (value !== 'unpaid') return value
-  // dueMonth is YYYY-MM-DD (first day of month). Compare with current month.
-  const today = new Date()
-  const currentMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-01`
-  return dueMonth < currentMonth ? 'overdue' : 'unpaid'
+  // dueMonth is "YYYY-MM-DD" (first day of month). Lexicographic compare works.
+  return dueMonth < firstOfCurrentMonthIso() ? 'overdue' : 'unpaid'
 }
 
 export function RentDueStatusBadge({
