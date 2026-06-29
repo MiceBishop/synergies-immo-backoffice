@@ -5,26 +5,29 @@
 
 :root {
   --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  /* Synergies Immo brand charcoal — used as the default body text colour. */
+  --foreground: oklch(0.18 0.005 30);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: oklch(0.18 0.005 30);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  /* Synergies Afrique deep navy — the prominent brand colour */
-  --primary: oklch(0.32 0.18 264);
+  --popover-foreground: oklch(0.18 0.005 30);
+  /* Synergies Immo brand red — the prominent colour from the badge + wordmark */
+  --primary: oklch(0.52 0.20 25);
   --primary-foreground: oklch(0.985 0 0);
-  /* Synergies Afrique light cyan — Africa silhouette accent */
-  --secondary: oklch(0.93 0.04 220);
-  --secondary-foreground: oklch(0.32 0.18 264);
+  /* Soft warm neutral so secondary buttons / inline surfaces aren't black on
+     black; foreground is the brand charcoal so secondary text stays on-brand. */
+  --secondary: oklch(0.95 0.005 30);
+  --secondary-foreground: oklch(0.20 0.005 30);
   --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.93 0.04 220);
-  --accent-foreground: oklch(0.32 0.18 264);
+  --muted-foreground: oklch(0.50 0.01 30);
+  /* Subtle red wash for hover / active highlights (e.g. selected sidebar item) */
+  --accent: oklch(0.95 0.03 25);
+  --accent-foreground: oklch(0.52 0.20 25);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.32 0.18 264);
+  --ring: oklch(0.52 0.20 25);
   --radius: 0.625rem;
 }
 

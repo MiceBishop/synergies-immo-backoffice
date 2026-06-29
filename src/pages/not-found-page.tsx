@@ -20,7 +20,7 @@ export function NotFoundPage() {
       <div className="relative w-full max-w-md text-center space-y-8">
         <img
           src="/logo.png"
-          alt="Synergies Afrique"
+          alt="Synergies Immo"
           className="h-10 w-auto mx-auto"
         />
 

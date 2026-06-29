@@ -63,7 +63,7 @@ export function LoginPage() {
         <div className="relative">
           <img
             src="/logo.png"
-            alt="Synergies Afrique"
+            alt="Synergies Immo"
             className="h-12 w-auto brightness-0 invert"
           />
         </div>
@@ -79,7 +79,7 @@ export function LoginPage() {
         </div>
 
         <div className="relative text-xs text-primary-foreground/60">
-          © {new Date().getFullYear()} Synergies Afrique
+          © {new Date().getFullYear()} Synergies Immo
         </div>
       </aside>
 
@@ -90,7 +90,7 @@ export function LoginPage() {
           <div className="flex justify-center lg:hidden">
             <img
               src="/logo.png"
-              alt="Synergies Afrique"
+              alt="Synergies Immo"
               className="h-10 w-auto"
             />
           </div>

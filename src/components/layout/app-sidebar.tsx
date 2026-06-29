@@ -73,7 +73,7 @@ export function AppSidebar() {
       <div className="h-14 px-6 flex items-center border-b">
         <img
           src="/logo.png"
-          alt="Synergies Afrique"
+          alt="Synergies Immo"
           className="h-7 w-auto"
         />
       </div>
