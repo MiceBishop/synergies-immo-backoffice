@@ -52,10 +52,10 @@ export function AppHeader() {
           </SheetTrigger>
           <SheetContent side="left" className="w-72 p-0 flex flex-col">
             <SheetHeader className="h-14 px-6 border-b flex flex-row items-center">
-              <SheetTitle className="sr-only">Synergies Afrique</SheetTitle>
+              <SheetTitle className="sr-only">Synergies Immo</SheetTitle>
               <img
                 src="/logo.png"
-                alt="Synergies Afrique"
+                alt="Synergies Immo"
                 className="h-7 w-auto"
               />
             </SheetHeader>
@@ -66,7 +66,7 @@ export function AppHeader() {
         </Sheet>
         <img
           src="/logo.png"
-          alt="Synergies Afrique"
+          alt="Synergies Immo"
           className="h-6 w-auto lg:hidden"
         />
       </div>
