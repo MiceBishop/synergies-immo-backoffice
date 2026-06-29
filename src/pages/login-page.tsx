@@ -50,22 +50,23 @@ export function LoginPage() {
     <main className="min-h-svh grid lg:grid-cols-2">
       {/* Brand splash — only shown on lg+ to keep mobile clean */}
       <aside className="hidden lg:flex flex-col justify-between bg-primary text-primary-foreground p-10 relative overflow-hidden">
-        {/* Decorative accent circle in the secondary brand color */}
+        {/* Soft decorative glows */}
         <div
           aria-hidden
-          className="absolute -top-32 -right-32 size-96 rounded-full bg-secondary/30 blur-3xl"
+          className="absolute -top-32 -right-32 size-96 rounded-full bg-white/15 blur-3xl"
         />
         <div
           aria-hidden
-          className="absolute -bottom-40 -left-20 size-[28rem] rounded-full bg-secondary/20 blur-3xl"
+          className="absolute -bottom-40 -left-20 size-[28rem] rounded-full bg-black/20 blur-3xl"
         />
 
+        {/* No logo here — the multicolour mark doesn't render on a red background.
+            We use a clean wordmark in white instead and put the real logo above the
+            form card. */}
         <div className="relative">
-          <img
-            src="/logo.png"
-            alt="Synergies Immo"
-            className="h-12 w-auto brightness-0 invert"
-          />
+          <p className="text-sm tracking-[0.3em] uppercase text-primary-foreground/80">
+            Synergies Immo
+          </p>
         </div>
 
         <div className="relative space-y-3 max-w-md">
@@ -86,12 +87,13 @@ export function LoginPage() {
       {/* Form column */}
       <section className="flex items-center justify-center p-6 sm:p-10">
         <div className="w-full max-w-sm space-y-6">
-          {/* Logo above card on mobile only (the splash hides on <lg) */}
-          <div className="flex justify-center lg:hidden">
+          {/* Real logo above the card on every screen size — renders naturally
+              in its red + charcoal palette on the white background. */}
+          <div className="flex justify-center">
             <img
               src="/logo.png"
               alt="Synergies Immo"
-              className="h-10 w-auto"
+              className="h-12 w-auto"
             />
           </div>
 

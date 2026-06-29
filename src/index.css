@@ -23,7 +23,10 @@
   /* Subtle red wash for hover / active highlights (e.g. selected sidebar item) */
   --accent: oklch(0.95 0.03 25);
   --accent-foreground: oklch(0.52 0.20 25);
-  --destructive: oklch(0.577 0.245 27.325);
+  /* Warm orange — deliberately a different hue from the brand red (~25 vs ~50)
+     so destructive actions don't get confused with regular primary actions
+     when the brand colour is itself red. */
+  --destructive: oklch(0.62 0.19 50);
   --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
@@ -46,7 +49,7 @@
   --muted-foreground: oklch(0.708 0 0);
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.396 0.141 25.723);
+  --destructive: oklch(0.52 0.18 50);
   --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(0.269 0 0);
   --input: oklch(0.269 0 0);

@@ -17,8 +17,9 @@ const STATUS_CLASSES: Record<EffectiveRentDueStatus, string> = {
   partial:
     'border-transparent bg-amber-100 text-amber-900 dark:bg-amber-900/40 dark:text-amber-200',
   unpaid: 'border-transparent bg-muted text-muted-foreground',
+  // Orange (not red) so overdue dues don't visually collide with the brand red
   overdue:
-    'border-transparent bg-red-100 text-red-900 dark:bg-red-900/40 dark:text-red-200',
+    'border-transparent bg-orange-100 text-orange-900 dark:bg-orange-900/40 dark:text-orange-200',
 }
 
 export function effectiveRentDueStatus(
